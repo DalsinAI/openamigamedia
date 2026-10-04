@@ -1,6 +1,6 @@
 # OpenMedia: design
 
-Dale, 4 October 2026: "can we port VLC to the Amiga based on our OpenRTG,
+We, 4 October 2026: "can we port VLC to the Amiga based on our OpenRTG,
 OpenGPU, and the not specified openmediahardware project; that work will
 drive that media hardware idea, i.e. expose a graphics chip's H.264, H.265
 etc hardware encoding". OpenMedia is that project. As the browser drives

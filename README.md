@@ -6,7 +6,7 @@ one interface with a driver per chip. Decoded frames go straight into
 OpenRTG's video RAM, where OpenGPU converts, scales and composites them, and
 the CPU never copies a frame.
 
-Dale, 4 October 2026: "expose a graphics chip's H.264, H.265 etc hardware
+We, 4 October 2026: "expose a graphics chip's H.264, H.265 etc hardware
 encoding", with VLC's port driving it. VLC for AmigaOS
 (https://github.com/DalsinAI/openamigavlc) is its first user, and its needs
 decide what OpenMedia offers first. `DESIGN.md` is the design.
