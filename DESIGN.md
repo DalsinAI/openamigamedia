@@ -34,7 +34,7 @@ OpenGPU's are (`ACRTG.gpu`). The names below are proposals.
 | Driver | Hardware | How |
 | --- | --- | --- |
 | `ACRTG.media` | AmigaChrome | The runtime's media unit on the ACRTG board. Each session runs on the PC's own video hardware through VA-API (Intel and AMD) or NVDEC and NVENC, with FFmpeg on the host as the fallback. Frames land straight in the board's video RAM, so the Amiga gets fast hardware decode and encode while the PC does the work. |
-| `VideoCore.media` | PiStorm | The Raspberry Pi's VideoCore decoders (H.264, and HEVC on a Pi 4 and Pi 5) through Emu68, as a provider, the way OpenMulticore's providers work. |
+| `VideoCore.media` | PiStorm | The Raspberry Pi's video decoders through Emu68, as a provider, the way OpenMulticore's providers work. A Pi 4 (BCM2711) decodes H.264 and HEVC. A Pi 5 or CM5 (BCM2712) decodes HEVC only: it has no H.264 decoder and no hardware encoder, so H.264 there goes to `CPU.media` on the Pi's ARM cores (checked 4 October 2026). |
 | `CPU.media` | Any Amiga | The FFmpeg module: LGPL, its own file, its source with it. |
 | Real cards | Where a chip's video engine is documented | Most classic Amiga cards have none, so the CPU module or a PiStorm is the path there. |
 
