@@ -1,0 +1,27 @@
+Short:        Video hardware decode and encode library
+Uploader:     (Dale fills this in at upload time)
+Author:       Dalsin Limited
+Type:         util/libs
+Version:      0.1
+Requires:     OpenRTG and OpenGPU
+Architecture: m68k-amigaos >= 3.2.0
+Distribution: Aminet
+
+OpenMedia gives Amiga programs a graphics chip's video engines.
+openmedia.library decodes and encodes H.264, H.265/HEVC, VP9, AV1 and more
+through one interface, with a driver per chip.
+
+Decoded frames go straight into OpenRTG's video RAM, where OpenGPU converts,
+scales and composites them, so the CPU never copies a frame.
+
+Drivers: AmigaChrome (the PC's own video hardware through the ACRTG board),
+the PiStorm (the Raspberry Pi's VideoCore), and a CPU fallback module built on
+FFmpeg for any Amiga. VLC for AmigaOS is its first user.
+
+Status: designed, not built; this readme is ready for the first release.
+
+Licence: MIT, Copyright (c) 2026 Dalsin Limited. The FFmpeg fallback module
+keeps FFmpeg's LGPL and ships as its own file with its source. If you build on
+it, we ask that you credit Dalsin Limited and AmigaChrome.
+
+Source: https://github.com/DalsinAI/openamigamedia
