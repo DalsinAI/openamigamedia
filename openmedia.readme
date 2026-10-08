@@ -14,7 +14,7 @@ through one interface, with a driver per chip.
 Decoded frames go straight into OpenRTG's video RAM, where OpenGPU converts,
 scales and composites them, so the CPU never copies a frame.
 
-Drivers: AmigaChrome (the PC's own video hardware through the ACRTG board),
+Drivers: AmigaChrome (the GPU's own video engines through the ACRTG board),
 the PiStorm (the Raspberry Pi's VideoCore), and a CPU fallback module built on
 FFmpeg for any Amiga. VLC for AmigaOS is its first user.
 
