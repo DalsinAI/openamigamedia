@@ -60,6 +60,6 @@ OpenGPU's are (`ACRTG.gpu`). The names below are proposals.
 ## 5. Licences
 
 The library, drivers, headers and test tools are MIT, Copyright (c) 2026
-Dalsin Limited. The FFmpeg fallback module is LGPL, built and shipped as its
+AmigaChrome Team. The FFmpeg fallback module is LGPL, built and shipped as its
 own file with its source. VLC's port is in its own repository; our files
 there are MIT, and VLC's keep VLC's licences.

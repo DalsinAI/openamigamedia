@@ -19,15 +19,15 @@ It works on AmigaChrome, PiStorm and real Amigas.
 
 ## Licence
 
-MIT, Copyright (c) 2026 Dalsin Limited (`LICENSE`). This covers the library,
+MIT, Copyright (c) 2026 AmigaChrome Team (`LICENSE`). This covers the library,
 the drivers, the headers and the test tools. The CPU fallback is a separate
 optional module built on FFmpeg; it keeps FFmpeg's LGPL and ships as its own
 file with its source.
 
 If you use or build on this work, we ask (we do not require) that you credit
-Dalsin Limited and AmigaChrome, for example "based on OpenMedia by Dalsin
-Limited".
+the AmigaChrome Team, for example "based on OpenMedia by the AmigaChrome
+Team".
 
 ## Contributors
 
-OpenMedia is created and maintained by [SacredTrees](https://github.com/SacredTrees) with the AmigaChrome agent team, copyright Dalsin Limited. Everyone whose work it includes is credited in [`CONTRIBUTORS.md`](CONTRIBUTORS.md).
+OpenMedia is created and maintained by [SacredTrees](https://github.com/SacredTrees) with the AmigaChrome agent team, copyright AmigaChrome Team. Everyone whose work it includes is credited in [`CONTRIBUTORS.md`](CONTRIBUTORS.md).
