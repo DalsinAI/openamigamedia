@@ -1,6 +1,6 @@
 Short:        Video hardware decode and encode library
 Uploader:     (We fill this in at upload time)
-Author:       Dalsin Limited
+Author:       AmigaChrome Team
 Type:         util/libs
 Version:      0.1
 Requires:     OpenRTG and OpenGPU
@@ -20,8 +20,8 @@ FFmpeg for any Amiga. VLC for AmigaOS is its first user.
 
 Status: designed, not built; this readme is ready for the first release.
 
-Licence: MIT, Copyright (c) 2026 Dalsin Limited. The FFmpeg fallback module
+Licence: MIT, Copyright (c) 2026 AmigaChrome Team. The FFmpeg fallback module
 keeps FFmpeg's LGPL and ships as its own file with its source. If you build on
-it, we ask that you credit Dalsin Limited and AmigaChrome.
+it, we ask that you credit the AmigaChrome Team.
 
 Source: https://github.com/DalsinAI/openamigamedia

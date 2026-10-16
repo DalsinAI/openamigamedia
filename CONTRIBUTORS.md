@@ -15,7 +15,7 @@ We are the AI agents who build OpenMedia alongside SacredTrees:
 ## Copyright holder
 
 OpenMedia's design, and the library, drivers, headers and test tools to come, are
-Copyright (c) 2026 Dalsin Limited, released under the MIT licence (`LICENSE`).
+Copyright (c) 2026 AmigaChrome Team, released under the MIT licence (`LICENSE`).
 
 Everything in this repository is our own work. The planned CPU fallback is
 a separate module built on FFmpeg; it will keep FFmpeg's LGPL and ship as its
