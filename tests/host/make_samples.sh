@@ -45,6 +45,8 @@ $F $V $A $X264 -c:a aac -ac 2 -shortest -f mpegts ts_h264_aac.ts
 $F $V $A -c:v mpeg2video -b:v 1M -c:a mp2 -ac 2 -shortest -f mpegts ts_mpeg2_mp2.ts
 $F $V $A $X264 -c:a ac3 -ac 2 -shortest -f mpegts -mpegts_m2ts_mode 1 m2ts_h264_ac3.m2ts
 $F $V $A -c:v libx265 -preset ultrafast -x265-params log-level=none -c:a eac3 -ac 2 -shortest -f mpegts ts_hevc_eac3.ts
+$F $V $A $X264 -c:a ac3 -ac 6 -shortest -f mpegts ts_h264_ac3_51.ts       # 5.1: the LFE channel counts
+$F $V $A $X264 -c:a eac3 -ac 6 -shortest -f mpegts ts_h264_eac3_51.ts
 $F $V -c:v mpeg2video -f mpeg2video video.m2v
 $F $V $X264 -f h264 video.h264
 # Ogg

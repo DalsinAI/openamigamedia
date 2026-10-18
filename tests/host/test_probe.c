@@ -217,6 +217,27 @@ static int check(const char *list, const char *dir)
         want_u(fld[0], "rate", fld[10], o.rate, 0);
         want_u(fld[0], "bits", fld[11], o.bits, 0);
         want_u(fld[0], "duration", fld[12], o.duration_ms, (uint32_t)strtoul(fld[13], NULL, 10));
+        /* With the least budget (64 KB, all of it the first read), a format whose details are
+         * near its start still gives them all: the parsers' rereads of the first 64 KB are free. */
+        if (size >= OM_BUDGET_MIN) {
+            static const char *const head_formats[] = { "WAVE", "AIFF", "AIFC", "8SVX", "16SV", "ILBM", "PNG",
+                                                        "JPEG", "GIF", "BMP", "FLAC", "MP3", "ADTS", "WEBP" };
+            om_info m;
+            unsigned j;
+            for (j = 0; j < sizeof head_formats / sizeof head_formats[0]; j++)
+                if (code_of(head_formats[j]) == o.container)
+                    break;
+            if (j < sizeof head_formats / sizeof head_formats[0]) {
+                probe_mem(p, size, &m, OM_BUDGET_MIN, NULL);
+                checks++;
+                if (m.kind != o.kind || m.container != o.container || m.width != o.width || m.height != o.height ||
+                    m.depth != o.depth || m.channels != o.channels || m.rate != o.rate || m.bits != o.bits) {
+                    printf("FAIL %s: with a 64 KB budget it says less:\n", fld[0]);
+                    show(fld[0], &m, 1);
+                    failures++;
+                }
+            }
+        }
         free(p);
     }
     fclose(f);
@@ -402,6 +423,20 @@ static int fuzz(const char *dir, int rounds)
             alarm(20);
             snprintf(what, sizeof what, "%s changed (round %d)", e->d_name, r);
             bad += fuzz_one(what, q, n, r % 5 ? OM_BUDGET_DEFAULT : OM_BUDGET_MIN);
+            probes++;
+        }
+        /* every AC-3 and E-AC-3 sync frame near the start with the reserved sample-rate
+         * codes (fscod 3, and for E-AC-3 fscod2 3 too) */
+        memcpy(q, p, (size_t)n);
+        for (cut = 0, r = 0; cut + 8 <= n && cut < 65536; cut++)
+            if (q[cut] == 0x0B && q[cut + 1] == 0x77) {
+                q[cut + 4] |= 0xF0;
+                r++;
+            }
+        if (r) {
+            alarm(20);
+            snprintf(what, sizeof what, "%s with reserved AC-3 rates", e->d_name);
+            bad += fuzz_one(what, q, n, OM_BUDGET_DEFAULT);
             probes++;
         }
         free(q);

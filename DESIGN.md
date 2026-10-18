@@ -98,7 +98,8 @@ headers only to say what they hold; it still never takes a container apart
   picture under 1 MB.
 - **A damaged or hostile file costs little.** Every read goes through one
   reader that stops at the file's end and at a budget (1 MB unless
-  `OMA_MaxRead` says otherwise, never under 64 KB). Every length and count
+  `OMA_MaxRead` says otherwise, never under 64 KB; the first 64 KB count
+  once however often the parsers look at them again). Every length and count
   read from a file is checked before it is used, and every loop has a fixed
   bound, so the worst file gets a partial answer, never a hang or a crash.
   Nothing big goes on the stack: the calls run on the caller's, which may be
@@ -106,10 +107,11 @@ headers only to say what they hold; it still never takes a container apart
   frames on every build). The work buffers (112 KB) are allocated per call.
 - **Where it lives:** `LIBS:openmedia.library` on disk (40 KB). The ROM is
   full; OpenUp installs the library with OpenFiles.
-- **Tests.** `tests/host/run.sh` makes 57 sample files with FFmpeg's
+- **Tests.** `tests/host/run.sh` makes 59 sample files with FFmpeg's
   command-line tool and `make_iff.py` (none is kept in the repository, and no
-  FFmpeg code is in the library), checks each against `samples.txt` (470
-  checks: the values come from how each file was made), then cuts every file
+  FFmpeg code is in the library), checks each against `samples.txt` (497
+  checks: the values come from how each file was made, and the files of 64 KB
+  or more again with the least budget), then cuts every file
   short at hundreds of lengths, changes bytes in its headers thousands of
   times, and feeds made-up hostile headers (boxes inside boxes, sizes of
   2^63, a million empty elements, lacing that never ends), all under

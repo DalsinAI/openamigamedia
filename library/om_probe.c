@@ -172,28 +172,46 @@ static uint64_t float_mul(uint64_t v, int bytes, uint32_t mul)
 
 /* ---- reading, within the budget ---- */
 
+/* n bytes at pos into buf: what om_probe's first read already holds comes
+ * from it, free; the rest is read and counted against the budget. */
 static long rd(om_src *s, uint64_t pos, void *buf, long n)
 {
-    long got;
+    long got, cached = 0;
     if (n <= 0 || s->failed || pos >= s->size)
         return 0;
     if ((uint64_t)n > s->size - pos)
         n = (long)(s->size - pos);
+    if (pos < s->headlen) {
+        const unsigned char *from = s->head + pos;
+        unsigned char *to = buf;
+        long i;
+        cached = (long)(s->headlen - pos);
+        if (cached > n)
+            cached = n;
+        if (to != from)                 /* no parser reads into the head buffer itself */
+            for (i = 0; i < cached; i++)
+                to[i] = from[i];
+        if (cached == n)
+            return n;
+        pos += (uint64_t)cached;
+        buf = (unsigned char *)buf + cached;
+        n -= cached;
+    }
     if ((uint32_t)n > s->budget) {
         s->spent = 1;
         n = (long)s->budget;
         if (n <= 0)
-            return 0;
+            return cached;
     }
     got = s->read_at(s->user, pos, buf, n);
     if (got < 0) {
         s->failed = 1;
-        return 0;
+        return cached;
     }
     if (got > n)
         got = n;
     s->budget -= (uint32_t)got;
-    return got;
+    return cached + got;
 }
 
 /* Exactly n bytes, or 0. */
@@ -373,27 +391,39 @@ static int adts_header(const unsigned char *p, uint32_t *rate, uint32_t *ch, uin
     return *rate && *len >= 7;
 }
 
-/* An AC-3 or E-AC-3 sync frame's start (ATSC A/52): its rate and channels; 0 if none. */
+/* An AC-3 or E-AC-3 sync frame's start (ATSC A/52; p[0..7]): its rate and
+ * channels, the LFE channel counted; 0 if none. */
 static uint32_t ac3_header(const unsigned char *p, uint32_t *rate, uint32_t *ch)
 {
     static const unsigned char chans[8] = { 2, 1, 2, 3, 3, 4, 4, 5 };
+    static const uint32_t r[3] = { 48000, 44100, 32000 };
     uint32_t bsid;
     if (p[0] != 0x0B || p[1] != 0x77)
         return 0;
     bsid = p[5] >> 3;
     if (bsid <= 10) {
-        static const uint32_t r[3] = { 48000, 44100, 32000 };
+        /* byte 6 on: acmod (3 bits), cmixlev (2) for a 3-front-channel
+         * mode, surmixlev (2) with surrounds, dsurmod (2) for 2/0, lfeon */
+        uint32_t acmod = p[6] >> 5, bit = 3, w = ((uint32_t)p[6] << 8) | p[7];
         if ((p[4] >> 6) == 3)
             return 0;
+        if ((acmod & 1) && acmod != 1)
+            bit += 2;
+        if (acmod & 4)
+            bit += 2;
+        if (acmod == 2)
+            bit += 2;
         *rate = r[p[4] >> 6];
-        *ch = chans[p[6] >> 5];
+        *ch = chans[acmod] + ((w >> (15 - bit)) & 1);
         return OMC_AC3;
     }
     if (bsid <= 16) {
-        static const uint32_t r[3] = { 48000, 44100, 32000 };
-        uint32_t fscod = p[4] >> 6;
-        *rate = fscod == 3 ? r[(p[4] >> 4) & 3] / 2 : r[fscod];
-        *ch = chans[(p[4] >> 1) & 7];
+        /* byte 4: fscod (2), fscod2 or numblkscod (2), acmod (3), lfeon (1) */
+        uint32_t fscod = p[4] >> 6, fscod2 = (p[4] >> 4) & 3;
+        if (fscod == 3 && fscod2 == 3)
+            return 0;                   /* reserved */
+        *rate = fscod == 3 ? r[fscod2] / 2 : r[fscod];
+        *ch = chans[(p[4] >> 1) & 7] + (p[4] & 1);
         return OMC_EAC3;
     }
     return 0;
@@ -2640,9 +2670,13 @@ int om_probe(om_src *s, om_info *o, unsigned char *scratch)
     o->size = s->size;
     if (s->budget < OM_BUDGET_MIN)
         s->budget = OM_BUDGET_MIN;
+    s->head = 0;
+    s->headlen = 0;
     hn = rd(s, 0, h, OM_HEAD);
     if (hn < 4)
         return 0;
+    s->head = h;                        /* the parsers' rereads of these bytes cost nothing */
+    s->headlen = (uint32_t)hn;
     if (hn >= 8 && (same(h + 4, "ftyp", 4) ||
                     ((same(h + 4, "moov", 4) || same(h + 4, "mdat", 4) || same(h + 4, "wide", 4) ||
                       same(h + 4, "free", 4) || same(h + 4, "skip", 4)) && be32(h) >= 8)))

@@ -97,7 +97,10 @@ openmedia.library/OM_ObtainMediaInfoA   openmedia.library/OM_ObtainMediaInfoA
 	    OMIF_DECODED when a datatype was asked to load the file.
 
 	OMA_MaxRead (ULONG) - the most bytes the parsers read from the file.
-	    Default 1 MB; anything under 64 KB counts as 64 KB.
+	    Default 1 MB; anything under 64 KB counts as 64 KB. The first
+	    64 KB are read once and count once, however often the parsers
+	    look at them again, so even the least budget gives every
+	    detail a format keeps near its start.
 
 	OMA_Error (LONG *) - gets OMERR_OK, or why the result is NULL:
 	    OMERR_NOFILE (the file couldn't be opened; IoErr() says why),

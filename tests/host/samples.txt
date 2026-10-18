@@ -27,6 +27,8 @@ ts_h264_aac.ts          video     MTS  H264   AAC     320 240 *     25  2  48000
 ts_mpeg2_mp2.ts         video     MTS  MP2V   MP2A    320 240 *     25  2  48000 *     2000 100
 m2ts_h264_ac3.m2ts      video     MTS  H264   AC-3    320 240 *     25  2  48000 *     2000 100
 ts_hevc_eac3.ts         video     MTS  HEVC   EAC3    320 240 *     *   2  48000 *     2000 100
+ts_h264_ac3_51.ts       video     MTS  H264   AC-3    320 240 *     25  6  48000 *     2000 100
+ts_h264_eac3_51.ts      video     MTS  H264   EAC3    320 240 *     25  6  48000 *     2000 100
 video.m2v               video     MPV  MP2V   -       320 240 *     25  *  *     *     *    0
 video.h264              video     264  H264   -       320 240 *     25  *  *     *     *    0
 ogv_theora_vorbis.ogv   video     OGG  THEO   VORB    320 240 *     25  2  48000 *     2000 60

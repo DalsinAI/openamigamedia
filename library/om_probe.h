@@ -43,6 +43,10 @@ typedef struct om_src {
     uint32_t budget;            /* bytes the parsers may still read; om_probe counts it down */
     int spent;                  /* the budget ran out on the way */
     int failed;                 /* a read failed */
+    /* set by om_probe: its first read, which the parsers' reads of those
+     * bytes come from again without counting against the budget */
+    const unsigned char *head;
+    uint32_t headlen;
 } om_src;
 
 #define OM_NAME 32
