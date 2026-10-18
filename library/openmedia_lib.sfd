@@ -1,0 +1,21 @@
+==id $Id: openmedia_lib.sfd 1.0 (18.10.2026) $
+* "openmedia.library"
+* MIT, Copyright (c) 2026 AmigaChrome Team.
+==base _OpenMediaBase
+==basetype struct Library *
+==libname openmedia.library
+==bias 30
+==public
+==include <exec/types.h>
+==include <utility/tagitem.h>
+==include <openmedia/openmedia.h>
+* Version 1, stage 0: what a file is
+struct OMMediaInfo * OM_ObtainMediaInfoA(struct TagItem * tags)(a0)
+==varargs
+struct OMMediaInfo * OM_ObtainMediaInfo(Tag tags, ...)(a0)
+VOID OM_ReleaseMediaInfo(struct OMMediaInfo * info)(a0)
+CONST_STRPTR OM_CodecName(ULONG codec)(d0)
+* -48 and -54 are kept for stage 0's own growth. Version 2's decode and
+* encode sessions start at -60 (DESIGN.md section 6).
+==reserve 2
+==end

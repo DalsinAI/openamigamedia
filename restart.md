@@ -6,9 +6,9 @@ _Written 6 October 2026 at about 23:55 UTC, while all work is paused on @SacredT
 
 OpenMedia: openmedia.library gives Amiga programs a graphics chip's video engines (H.264, H.265 and more, decode and encode) through one interface, with frames landing in OpenRTG video RAM.
 
-## Where it stands
+## Where it stands (18 October 2026)
 
-Designed, not built. It waits on OpenGPU and the ACRTG v3 ring (amigachrome #213).
+Stage 0 is built (DESIGN.md section 6): `openmedia.library` 1.0 with `OM_ObtainMediaInfoA`, `OM_ReleaseMediaInfo` and `OM_CodecName`, the parsers' host tests (57 samples, 470 checks, fuzzing), and `C:OpenMediaInfo`; tested in a lab on the open ROM and on Kickstart 3.2.3. OpenFiles 0.4.1's Information window is its first user. The blockers of phase 1, OpenGPU and the ACRTG v3 ring (amigachrome #213), are done.
 
 ## Merged lately
 
@@ -20,7 +20,8 @@ Designed, not built. It waits on OpenGPU and the ACRTG v3 ring (amigachrome #213
 
 ## Next step
 
-1. Phase 1 after #213 lands: a host-decode driver for AmigaChrome, feeding VLC's port.
+1. Phase 1: a host-decode driver for AmigaChrome, feeding VLC's port; its calls take the LVOs from -60 (DESIGN.md section 6).
+2. OpenUp installs `LIBS:openmedia.library` with OpenFiles.
 
 ## Waiting on @SacredTrees
 

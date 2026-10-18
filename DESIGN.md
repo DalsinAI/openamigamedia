@@ -57,7 +57,90 @@ OpenGPU's are (`ACRTG.gpu`). The names below are proposals.
 | 4 | `VideoCore.media` for the PiStorm; `CPU.media` | Playback on a PiStorm, and on a real Amiga through the CPU module |
 | 5 | The Installer; Aminet (util/libs) | |
 
-## 5. Licences
+## 6. Stage 0: what a file is (version 1, 18 October 2026)
+
+Dale, 18 October 2026: OpenFiles' Information window gets "file properties
+and image format. This will come from our openmedia.library". Before any
+hardware decode, the library's first call tells what a file is: a small,
+stable public call that every later version keeps. It reads containers'
+headers only to say what they hold; it still never takes a container apart
+(section 1: that stays the player's job).
+
+- **One call.** `OM_ObtainMediaInfoA` takes tags (`OMA_Name`, `OMA_Lock` or
+  `OMA_FileHandle`; `OMA_DataTypes`, `OMA_Decode`, `OMA_MaxRead`, `OMA_Error`)
+  and gives a `struct OMMediaInfo` of the library's own: the kind (picture,
+  sound, video, animation...), the container and its name, the datatype that
+  reads it, the size in bytes, the length, the pixel size and depth, the
+  frame rate and frames, the video and sound codecs with their names, the
+  channels, sample rate and bits, the bit rate and the tracks of each kind.
+  `OM_ReleaseMediaInfo` gives it back; the library allocates it, so later
+  versions add fields at the end (`omi_Version`, `omi_Size`).
+  `OM_CodecName` names a codec. `include/openmedia/openmedia.h` is the
+  interface, `docs/openmedia.doc` its autodoc.
+- **Our own parsers first** (`library/om_probe.c`), written from the formats'
+  public specifications and nothing else (no FFmpeg, libav or MediaInfo code):
+  - **video:** MP4, QuickTime and 3GP (ISO base media), Matroska and WebM,
+    AVI, MPEG program and transport streams, Ogg with Theora, and MPEG-1/2,
+    H.264 and HEVC streams on their own;
+  - **sound:** WAV (and RF64), AIFF and AIFF-C, IFF 8SVX and 16SV, FLAC, MP3
+    and the other MPEG audio layers, AAC in ADTS, Ogg Vorbis, Opus, FLAC and
+    Speex;
+  - **Amiga animation:** IFF ANIM (size, depth, frames, timing, compression);
+  - **pictures:** IFF ILBM (with HAM and EHB), PNG (and APNG), JPEG, GIF,
+    BMP, WebP, HEIF and AVIF: the size and depth from the header alone.
+- **datatypes.library next.** A file the parsers don't know goes to
+  `ObtainDataType`, and its group gives the kind and its name the format.
+  Pictures are asked too, so the answer names the datatype that shows them.
+  With `OMA_Decode` (off by default) a datatype may load the whole file when
+  that is the only way to learn a picture's size or a sound's length: a full
+  decode, which costs seconds for a large JPEG on a 68040 and the picture's
+  memory while it runs. The autodoc says so; OpenFiles asks for it only on a
+  picture under 1 MB.
+- **A damaged or hostile file costs little.** Every read goes through one
+  reader that stops at the file's end and at a budget (1 MB unless
+  `OMA_MaxRead` says otherwise, never under 64 KB). Every length and count
+  read from a file is checked before it is used, and every loop has a fixed
+  bound, so the worst file gets a partial answer, never a hang or a crash.
+  Nothing big goes on the stack: the calls run on the caller's, which may be
+  4 KB (the deepest chain is about 1.5 KB; `build.sh` lists the largest
+  frames on every build). The work buffers (112 KB) are allocated per call.
+- **Where it lives:** `LIBS:openmedia.library` on disk (40 KB). The ROM is
+  full; OpenUp installs the library with OpenFiles.
+- **Tests.** `tests/host/run.sh` makes 57 sample files with FFmpeg's
+  command-line tool and `make_iff.py` (none is kept in the repository, and no
+  FFmpeg code is in the library), checks each against `samples.txt` (470
+  checks: the values come from how each file was made), then cuts every file
+  short at hundreds of lengths, changes bytes in its headers thousands of
+  times, and feeds made-up hostile headers (boxes inside boxes, sizes of
+  2^63, a million empty elements, lacing that never ends), all under
+  AddressSanitizer, checking each probe stays within its read budget.
+  `C:OpenMediaInfo` (`tools/`) prints the answer on the Amiga, one line a
+  file with `LINE` in the host tests' form, so a lab's answers compare with
+  the host's.
+
+### The LVOs, now and to come
+
+| LVO | Call | Version |
+| --- | --- | --- |
+| -30 | `OM_ObtainMediaInfoA(tags)(a0)` | 1 |
+| -36 | `OM_ReleaseMediaInfo(info)(a0)` | 1 |
+| -42 | `OM_CodecName(codec)(d0)` | 1 |
+| -48, -54 | kept for stage 0's own growth (`==reserve 2`) | |
+| -60 | `OM_QueryA`: what the hardware can do (section 1) | 2 |
+| -66 | `OM_OpenDecoderA` | 2 |
+| -72 | `OM_OpenEncoderA` | 2 |
+| -78 | `OM_CloseSession` | 2 |
+| -84 | `OM_SubmitA`: one access unit in | 2 |
+| -90 | `OM_GetFrameA`: a frame out, with its time | 2 |
+| -96 | `OM_ReleaseFrame` | 2 |
+| -102 | `OM_AllocSurfaceA` | 2 |
+| -108 | `OM_FreeSurface` | 2 |
+| -114 | `OM_SessionAttrsA` | 2 |
+
+The version 2 names and their order are the plan, not yet in the SFD: they
+are written in when phase 1 builds them, at these offsets.
+
+## 7. Licences
 
 The library, drivers, headers and test tools are MIT, Copyright (c) 2026
 AmigaChrome Team. The FFmpeg fallback module is LGPL, built and shipped as its
