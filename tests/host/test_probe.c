@@ -158,6 +158,105 @@ static void want_c(const char *file, const char *what, const char *field, uint32
     }
 }
 
+static void put16b(unsigned char *p, uint32_t v) { p[0] = (unsigned char)(v >> 8); p[1] = (unsigned char)v; }
+static void put32b(unsigned char *p, uint32_t v) { put16b(p, v >> 16); put16b(p + 2, v & 0xFFFF); }
+
+static void want(const char *what, int ok)
+{
+    checks++;
+    if (!ok) {
+        printf("FAIL %s\n", what);
+        failures++;
+    }
+}
+
+/* ADTS frames of len bytes (or len and len + 100 by turns), each with 2 raw data blocks */
+static long adts_frames(unsigned char *b, int frames, int len, int vary)
+{
+    long pos = 0;
+    int i;
+    for (i = 0; i < frames; i++) {
+        int l = vary && (i & 1) ? len + 100 : len;
+        unsigned char *p = b + pos;
+        memset(p, 0, (size_t)l);
+        p[0] = 0xFF;
+        p[1] = 0xF1;                            /* MPEG-4, no CRC */
+        p[2] = (1 << 6) | (3 << 2);             /* AAC LC, 48000 Hz */
+        p[3] = (unsigned char)((2 << 6) | ((l >> 11) & 3));     /* 2 channels */
+        p[4] = (unsigned char)(l >> 3);
+        p[5] = (unsigned char)(((l & 7) << 5) | 0x1F);
+        p[6] = 0xFC | 1;                        /* buffer fullness 0x7FF; 2 raw data blocks */
+        pos += l;
+    }
+    return pos;
+}
+
+/* Files made here, for what FFmpeg doesn't make: what each must be found to be. */
+static void synthetic(void)
+{
+    static unsigned char b[65536];
+    om_info o;
+    long n, i;
+    /* ADTS with 2 raw data blocks a frame: 2048 samples each, and constant frames aren't VBR */
+    n = adts_frames(b, 100, 200, 0);
+    probe_mem(b, (uint64_t)n, &o, OM_BUDGET_DEFAULT, NULL);
+    want("adts 2 blocks: 37500 bit/s", o.bitrate == 37500);
+    want("adts constant frames: not VBR", !(o.flags & OMIF_VBR));
+    n = adts_frames(b, 100, 200, 1);
+    probe_mem(b, (uint64_t)n, &o, OM_BUDGET_DEFAULT, NULL);
+    want("adts frames of two sizes: VBR", (o.flags & OMIF_VBR) != 0);
+    /* HEIF: a thumbnail's ispe (property 1, item 1) before the primary item's (property 2, item 2) */
+    memset(b, 0, 512);
+    i = 0;
+    put32b(b + i, 20); memcpy(b + i + 4, "ftypheic\0\0\0\0mif1", 16); i += 20;
+    put32b(b + i, 139); memcpy(b + i + 4, "meta", 4); i += 12;
+    put32b(b + i, 33); memcpy(b + i + 4, "hdlr", 4); memcpy(b + i + 16, "pict", 4); i += 33;
+    put32b(b + i, 14); memcpy(b + i + 4, "pitm", 4); put16b(b + i + 12, 2); i += 14;
+    put32b(b + i, 80); memcpy(b + i + 4, "iprp", 4); i += 8;
+    put32b(b + i, 48); memcpy(b + i + 4, "ipco", 4); i += 8;
+    put32b(b + i, 20); memcpy(b + i + 4, "ispe", 4); put32b(b + i + 12, 160); put32b(b + i + 16, 120); i += 20;
+    put32b(b + i, 20); memcpy(b + i + 4, "ispe", 4); put32b(b + i + 12, 640); put32b(b + i + 16, 480); i += 20;
+    put32b(b + i, 24); memcpy(b + i + 4, "ipma", 4); put32b(b + i + 12, 2);
+    put16b(b + i + 16, 1); b[i + 18] = 1; b[i + 19] = 0x01;     /* item 1: property 1 */
+    put16b(b + i + 20, 2); b[i + 22] = 1; b[i + 23] = 0x82;     /* item 2: property 2, essential */
+    i += 24;
+    probe_mem(b, (uint64_t)i, &o, OM_BUDGET_DEFAULT, NULL);
+    want("heif: the primary item's 640 x 480, not the thumbnail's", o.width == 640 && o.height == 480);
+    /* MPEG-TS: a PMT section of 226 bytes (200 of program descriptors), so its streams are in its
+     * second packet */
+    memset(b, 0xFF, 188 * 12);
+    {
+        unsigned char sec[226], *p;
+        long k;
+        p = b;                                  /* the PAT: program 1's PMT on PID 0x1000 */
+        p[0] = 0x47; p[1] = 0x40; p[2] = 0x00; p[3] = 0x10; p[4] = 0;
+        p[5] = 0x00; p[6] = 0xB0; p[7] = 13; put16b(p + 8, 1); p[10] = 0xC1; p[11] = 0; p[12] = 0;
+        put16b(p + 13, 1); put16b(p + 15, 0xE000 | 0x1000); memset(p + 17, 0, 4);
+        memset(sec, 0, sizeof sec);
+        sec[0] = 0x02; sec[1] = 0xB0; sec[2] = 223;
+        put16b(sec + 3, 1); sec[5] = 0xC1; sec[6] = 0; sec[7] = 0;
+        put16b(sec + 8, 0xE000 | 0x100);       /* PCR PID */
+        put16b(sec + 10, 0xF000 | 200);        /* 200 bytes of program descriptors */
+        sec[12] = 0xFE; sec[13] = 198;
+        k = 12 + 200;
+        sec[k] = 0x1B; put16b(sec + k + 1, 0xE000 | 0x100); put16b(sec + k + 3, 0xF000);   /* H.264 */
+        k += 5;
+        sec[k] = 0x0F; put16b(sec + k + 1, 0xE000 | 0x101); put16b(sec + k + 3, 0xF000);   /* AAC */
+        p = b + 188;
+        p[0] = 0x47; p[1] = 0x50; p[2] = 0x00; p[3] = 0x10; p[4] = 0;
+        memcpy(p + 5, sec, 183);
+        p = b + 376;
+        p[0] = 0x47; p[1] = 0x10; p[2] = 0x00; p[3] = 0x11;
+        memcpy(p + 4, sec + 183, sizeof sec - 183);
+        for (k = 3; k < 12; k++) {
+            p = b + 188 * k;
+            p[0] = 0x47; p[1] = 0x1F; p[2] = 0xFF; p[3] = 0x10;    /* null packets */
+        }
+    }
+    probe_mem(b, 188 * 12, &o, OM_BUDGET_DEFAULT, NULL);
+    want("ts: a PMT over two packets gives H.264 and AAC", o.vcodec == OMC_H264 && o.acodec == OMC_AAC);
+}
+
 static int check(const char *list, const char *dir)
 {
     FILE *f = fopen(list, "r");
@@ -241,6 +340,7 @@ static int check(const char *list, const char *dir)
         free(p);
     }
     fclose(f);
+    synthetic();
     printf("%d files, %d checks, %d failed\n", files, checks, failures);
     return failures ? 1 : 0;
 }
@@ -323,6 +423,14 @@ static int hostile(void)
     for (i = 12; i + 12 < (int)sizeof b; i += 12)
         memcpy(b + i, "LIST\xFF\xFF\xFF\x7Fhdrl", 12);
     bad += fuzz_one("avi lists", b, sizeof b, OM_BUDGET_DEFAULT);
+    /* BMP, top-down, with the height -2^31 (its magnitude doesn't fit a signed long) */
+    memset(b, 0, 64);
+    memcpy(b, "BM", 2);
+    b[14] = 40;
+    b[18] = 1;
+    b[25] = 0x80;
+    b[28] = 24;
+    bad += fuzz_one("bmp height -2^31", b, 64, OM_BUDGET_DEFAULT);
     /* ID3 tag saying it is bigger than the file, then nothing */
     memset(b, 0, sizeof b);
     memcpy(b, "ID3\x04\x00\x00\x7F\x7F\x7F\x7F", 10);

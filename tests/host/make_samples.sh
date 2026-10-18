@@ -51,6 +51,7 @@ $F $V -c:v mpeg2video -f mpeg2video video.m2v
 $F $V $X264 -f h264 video.h264
 # Ogg
 $F $V $A -c:v libtheora -q:v 5 -c:a libvorbis -ac 2 -shortest ogv_theora_vorbis.ogv
+$F $V -f lavfi -i sine=frequency=440:sample_rate=48000:duration=1 -c:v libtheora -q:v 5 -c:a libvorbis -ac 2 ogv_short_sound.ogv   # the longer stream's length
 $F $A -c:a libvorbis -ac 2 ogg_vorbis.ogg
 $F $A -c:a libopus -ac 2 opus.opus
 $F $A44 -c:a flac -f ogg oga_flac.oga

@@ -380,14 +380,18 @@ static uint32_t mpa_codec(const mpa *m) { return m->layer == 1 ? OMC_MP1 : m->la
 static const uint32_t aac_rates[16] = { 96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050,
                                          16000, 12000, 11025, 8000, 7350, 0, 0, 0 };
 
-/* An ADTS header (ISO/IEC 13818-7 6.2): 1 if it is one; its rate, channels and length. */
-static int adts_header(const unsigned char *p, uint32_t *rate, uint32_t *ch, uint32_t *len)
+/* An ADTS header (ISO/IEC 13818-7 6.2; p[0..6]): 1 if it is one; its rate,
+ * channels and length, and (blocks not NULL) its raw data blocks, 1 to 4,
+ * of 1024 samples each. */
+static int adts_header(const unsigned char *p, uint32_t *rate, uint32_t *ch, uint32_t *len, uint32_t *blocks)
 {
     if (p[0] != 0xFF || (p[1] & 0xF6) != 0xF0)
         return 0;
     *rate = aac_rates[(p[2] >> 2) & 15];
     *ch = ((uint32_t)(p[2] & 1) << 2) | (p[3] >> 6);
     *len = ((uint32_t)(p[3] & 3) << 11) | ((uint32_t)p[4] << 3) | (p[5] >> 5);
+    if (blocks)
+        *blocks = (uint32_t)(p[6] & 3) + 1;
     return *rate && *len >= 7;
 }
 
@@ -1183,26 +1187,33 @@ static int parse_mpa(om_src *s, om_info *o, const unsigned char *buf, long n, lo
 
 static int parse_adts(om_src *s, om_info *o, const unsigned char *buf, long n, long i, uint64_t base)
 {
-    uint32_t rate, ch, len, frames = 0, bytes = 0, k = 0;
+    uint32_t rate, ch, len, blocks, frames = 0, bytes = 0, k = 0, minlen = 0xFFFFFFFFUL, maxlen = 0;
     long p = i;
     set_format(o, OMK_SOUND, OMF_ADTS, "AAC (ADTS)");
     set_acodec(o, OMC_AAC, 0);
     o->atracks = 1;
-    if (!adts_header(buf + i, &rate, &ch, &len))
+    if (!adts_header(buf + i, &rate, &ch, &len, 0))
         return 1;
     o->rate = rate;
     o->channels = ch;
-    /* the frames in the bytes already read give the average bit rate */
-    while (p + 7 <= n && k++ < 4096 && adts_header(buf + p, &rate, &ch, &len)) {
-        frames++;
+    /* the frames in the bytes already read give the average bit rate: their
+     * raw data blocks (1024 samples each) over their bytes */
+    while (p + 7 <= n && k++ < 4096 && adts_header(buf + p, &rate, &ch, &len, &blocks)) {
+        frames += blocks;
         bytes += len;
+        if (len < minlen)
+            minlen = len;
+        if (len > maxlen)
+            maxlen = len;
         p += len;
     }
     if (frames && bytes) {
         o->bitrate = mdiv((uint64_t)bytes * 8, o->rate, (uint64_t)frames * 1024);
         if (o->bitrate)
             o->duration_ms = mdiv(s->size - base - (uint64_t)i, 8000, o->bitrate);
-        o->flags |= OMIF_DURATION_ESTIMATED | OMIF_VBR;
+        o->flags |= OMIF_DURATION_ESTIMATED;
+        if (maxlen != minlen)
+            o->flags |= OMIF_VBR;               /* the frames' sizes differ */
     }
     return 1;
 }
@@ -1241,7 +1252,7 @@ static int parse_audio_stream(om_src *s, om_info *o, unsigned char *h, long hn, 
             } else if (i + (long)m.len >= n && (uint64_t)n == s->size - base)
                 return parse_mpa(s, o, b, n, i, base, &m);     /* a file of one frame */
         }
-        if (adts_header(b + i, &r, &c, &l) && i + (long)l + 6 <= n && adts_header(b + i + l, &r2, &c2, &l2) && r2 == r)
+        if (adts_header(b + i, &r, &c, &l, 0) && i + (long)l + 6 <= n && adts_header(b + i + l, &r2, &c2, &l2, 0) && r2 == r)
             return parse_adts(s, o, b, n, i, base);
     }
     return 0;
@@ -1344,15 +1355,19 @@ static int parse_bmp(om_info *o, const unsigned char *h, long hn)
         o->height = le16(h + 20);
         o->depth = le16(h + 24);
     } else {
-        int32_t ht = (int32_t)le32(h + 22);
+        uint32_t ht = le32(h + 22);             /* negative (top-down) as two's complement */
         o->width = le32(h + 18);
-        o->height = (uint32_t)(ht < 0 ? -ht : ht);
+        o->height = ht & 0x80000000UL ? 0u - ht : ht;   /* unsigned: 0x80000000 can't overflow */
         o->depth = le16(h + 28);
     }
     return 1;
 }
 
 /* ---- ISO base media files: MP4, QuickTime, 3GP, HEIF and AVIF ---- */
+
+#define BM_PROPS 32                     /* HEIF: ispe properties kept */
+#define BM_ITEMS 16                     /* items whose properties are kept, */
+#define BM_ASSOC 8                      /* and the properties of each */
 
 typedef struct bmff {
     om_src *s;
@@ -1365,7 +1380,14 @@ typedef struct bmff {
     uint64_t md_dur;
     int qt_v2_rate;
     uint64_t longest_ms;
-    uint32_t ispe_w, ispe_h;
+    uint32_t ispe_w, ispe_h;            /* HEIF: the first ispe, when nothing says which item is the primary */
+    /* HEIF (ISO/IEC 23008-12): pitm names the primary item, ipco holds the
+     * properties (numbered from 1), ipma lists each item's property numbers */
+    uint32_t pitm, ipco_depth, prop, nprop, nitem;
+    uint32_t prop_no[BM_PROPS], prop_w[BM_PROPS], prop_h[BM_PROPS];
+    uint32_t item_id[BM_ITEMS];
+    uint16_t item_prop[BM_ITEMS][BM_ASSOC];
+    unsigned char item_n[BM_ITEMS];
     unsigned char h[16], d[512];        /* a box's header and its data: one for every level (the walk recurses) */
 } bmff;
 
@@ -1546,12 +1568,49 @@ static void bmff_walk(bmff *b, uint64_t pos, uint64_t end, int depth)
             b->o->flags |= OMIF_TRUNCATED;
             size = end - pos;
         }
+        if (b->ipco_depth && (uint32_t)depth == b->ipco_depth)
+            b->prop++;                          /* the next property in ipco: they count from 1 */
         switch (type) {
         case OM_ID('m', 'o', 'o', 'v'): case OM_ID('m', 'd', 'i', 'a'): case OM_ID('m', 'i', 'n', 'f'):
         case OM_ID('s', 't', 'b', 'l'): case OM_ID('m', 'v', 'e', 'x'): case OM_ID('i', 'p', 'r', 'p'):
-        case OM_ID('i', 'p', 'c', 'o'):
             if (depth < 8)
                 bmff_walk(b, pos + hl, pos + size, depth + 1);
+            break;
+        case OM_ID('i', 'p', 'c', 'o'):
+            if (depth < 8 && !b->ipco_depth) {
+                b->ipco_depth = (uint32_t)depth + 1;
+                b->prop = 0;
+                bmff_walk(b, pos + hl, pos + size, depth + 1);
+                b->ipco_depth = 0;
+            }
+            break;
+        case OM_ID('p', 'i', 't', 'm'):         /* version, flags, then the item's number (16 or 32 bits) */
+            if (rdx(b->s, pos + hl, d, 6))
+                b->pitm = d[0] == 0 ? be16(d + 4) : (rdx(b->s, pos + hl, d, 8) ? be32(d + 4) : 0);
+            break;
+        case OM_ID('i', 'p', 'm', 'a'):
+            n = rd(b->s, pos + hl, d, size - hl < sizeof b->d ? (long)(size - hl) : (long)sizeof b->d);
+            if (n >= 8) {
+                /* version, flags (bit 0: 16-bit property numbers), the item count; then each item's
+                 * number (16 bits, or 32 from version 1), its count of properties, and their numbers */
+                uint32_t count = be32(d + 4), e, wide = d[3] & 1, idlen = d[0] < 1 ? 2 : 4;
+                long i = 8;
+                for (e = 0; e < count && e < 4096 && i + (long)idlen + 1 <= n; e++) {
+                    uint32_t id = idlen == 2 ? be16(d + i) : be32(d + i), na, k;
+                    i += (long)idlen;
+                    na = d[i++];
+                    for (k = 0; k < na && i + 1 + (long)wide <= n; k++) {
+                        uint32_t no = wide ? be16(d + i) & 0x7FFF : d[i] & 0x7Fu;
+                        i += 1 + (long)wide;
+                        if (k == 0 && b->nitem < BM_ITEMS) {
+                            b->item_id[b->nitem] = id;
+                            b->item_n[b->nitem++] = 0;
+                        }
+                        if (b->nitem && b->item_id[b->nitem - 1] == id && b->item_n[b->nitem - 1] < BM_ASSOC)
+                            b->item_prop[b->nitem - 1][b->item_n[b->nitem - 1]++] = (uint16_t)no;
+                    }
+                }
+            }
             break;
         case OM_ID('m', 'e', 't', 'a'):         /* a full box: its children start after version and flags */
             if (depth < 8 && size >= hl + 4)
@@ -1614,9 +1673,16 @@ static void bmff_walk(bmff *b, uint64_t pos, uint64_t end, int depth)
                 b->samples = be32(d + 8);
             break;
         case OM_ID('i', 's', 'p', 'e'):
-            if (!b->ispe_w && rdx(b->s, pos + hl, d, 12)) {
-                b->ispe_w = be32(d + 4);
-                b->ispe_h = be32(d + 8);
+            if (rdx(b->s, pos + hl, d, 12)) {
+                if (!b->ispe_w) {
+                    b->ispe_w = be32(d + 4);
+                    b->ispe_h = be32(d + 8);
+                }
+                if (b->ipco_depth && (uint32_t)depth == b->ipco_depth && b->nprop < BM_PROPS) {
+                    b->prop_no[b->nprop] = b->prop;
+                    b->prop_w[b->nprop] = be32(d + 4);
+                    b->prop_h[b->nprop++] = be32(d + 8);
+                }
             }
             break;
         }
@@ -1637,9 +1703,21 @@ static int parse_bmff(om_src *s, om_info *o, const unsigned char *h, long hn, vo
     if (fourcc_is(brand, "avif") || fourcc_is(brand, "avis") || fourcc_is(brand, "heic") || fourcc_is(brand, "heix") ||
         fourcc_is(brand, "mif1") || fourcc_is(brand, "msf1") || fourcc_is(brand, "heim") || fourcc_is(brand, "heis")) {
         if (!o->vtracks) {
+            uint32_t i, k, j;
             set_format(o, OMK_PICTURE, OMF_HEIF, fourcc_is(brand, "avif") || fourcc_is(brand, "avis") ? "AVIF" : "HEIF");
             o->width = bp->ispe_w;
             o->height = bp->ispe_h;
+            /* the primary item's own size, not a thumbnail's that came first */
+            for (i = 0; bp->pitm && i < bp->nitem; i++)
+                if (bp->item_id[i] == bp->pitm)
+                    for (k = 0; k < bp->item_n[i]; k++)
+                        for (j = 0; j < bp->nprop; j++)
+                            if (bp->prop_no[j] == bp->item_prop[i][k]) {
+                                o->width = bp->prop_w[j];
+                                o->height = bp->prop_h[j];
+                                k = bp->item_n[i];
+                                break;
+                            }
             return 1;
         }
     }
@@ -1983,6 +2061,7 @@ static int parse_mkv(om_src *s, om_info *o, void *aux)
 
 typedef struct ogg_stream {
     uint32_t serial, codec, rate, preskip, frn, frd, shift, channels, bitrate, w, h;
+    uint32_t ver;                       /* Theora: VMAJ VMIN VREV */
     uint64_t last;
     int has_last;
 } ogg_stream;
@@ -2013,6 +2092,7 @@ static void ogg_ident(ogg *g, uint32_t serial, const unsigned char *p, long n)
         t->rate = 48000;                        /* Opus's granule positions always count at 48 kHz */
     } else if (n >= 42 && same(p, "\x80theora", 7)) {
         t->codec = OMC_THEORA;
+        t->ver = ((uint32_t)p[7] << 16) | ((uint32_t)p[8] << 8) | p[9];
         t->w = be24(p + 14);
         t->h = be24(p + 17);
         t->frn = be32(p + 22);
@@ -2102,7 +2182,11 @@ static int parse_ogg(om_src *s, om_info *o, unsigned char *work, void *aux)
         o->height = v->h;
         set_fps(o, v->frn, v->frd);
         if (v->has_last && v->frn && v->shift < 32) {
+            /* the last frame's number: counted from 1 since bitstream 3.2.1,
+             * from 0 before it */
             uint64_t frames = (v->last >> v->shift) + (v->last & ((1ULL << v->shift) - 1));
+            if (v->ver < 0x030201UL)
+                frames++;
             o->frames = frames > BIG ? BIG : (uint32_t)frames;
             o->duration_ms = mdiv(frames * v->frd, 1000, v->frn);
         }
@@ -2113,8 +2197,11 @@ static int parse_ogg(om_src *s, om_info *o, unsigned char *work, void *aux)
         o->rate = a->codec == OMC_OPUS ? 48000 : a->rate;
         o->bitrate = a->bitrate;
         if (a->has_last && a->rate) {
+            /* the file lasts as long as its longer stream */
             uint64_t smp = a->last > a->preskip ? a->last - a->preskip : 0;
-            o->duration_ms = mdiv(smp, 1000, a->rate);
+            uint32_t ms = mdiv(smp, 1000, a->rate);
+            if (ms > o->duration_ms)
+                o->duration_ms = ms;
         }
         if (o->bitrate == 0 && o->duration_ms)
             o->bitrate = mdiv(s->size, 8000, o->duration_ms);
@@ -2226,7 +2313,7 @@ static void audio_es(om_info *o, const unsigned char *p, long n, uint32_t hint)
             o->channels = m.channels;
             return;
         }
-        if ((hint == 0 || hint == OMC_AAC) && adts_header(p + i, &r, &c, &l)) {
+        if ((hint == 0 || hint == OMC_AAC) && adts_header(p + i, &r, &c, &l, 0)) {
             set_acodec(o, OMC_AAC, 0);
             o->rate = r;
             o->channels = c;
@@ -2396,7 +2483,8 @@ typedef struct ts {
     long vn, an;
     uint64_t first_pcr, last_pcr, first_pts, last_pts;
     int have_first_pcr, have_last_pcr, have_first_pts, have_last_pts;
-    unsigned char vbuf[4096], abuf[1024];
+    long pmt_n;                         /* the PMT section's bytes so far (it may span packets) */
+    unsigned char vbuf[4096], abuf[1024], pmt[1024];
 } ts;
 
 static uint64_t pes_pts(const unsigned char *p, long n, int *ok)
@@ -2572,11 +2660,29 @@ static void ts_packet(ts *t, const unsigned char *p, int tail)
                     break;
                 }
         }
-    } else if ((int)pid == t->pmt_pid && pusi && !t->have_pmt) {
-        const unsigned char *sec = p + off + 1 + p[off];
-        long n = 188 - (long)(sec - p);
-        if (n > 0)
-            ts_pmt(t, sec, n);
+    } else if ((int)pid == t->pmt_pid && !t->have_pmt) {
+        /* the section from where its packet's pointer field says, then the
+         * following packets' payloads until it is all there (3 + its length) */
+        const unsigned char *from = pusi ? p + off + 1 + p[off] : p + off;
+        long n = 188 - (long)(from - p), i, need;
+        if (pusi)
+            t->pmt_n = 0;
+        else if (!t->pmt_n)
+            return;                             /* a continuation without its start */
+        if (n <= 0)
+            return;
+        if (n > (long)sizeof t->pmt - t->pmt_n)
+            n = (long)sizeof t->pmt - t->pmt_n;
+        for (i = 0; i < n; i++)
+            t->pmt[t->pmt_n + i] = from[i];
+        t->pmt_n += n;
+        if (t->pmt_n >= 3) {
+            need = 3 + (long)(be16(t->pmt + 1) & 0xFFF);
+            if (need > (long)sizeof t->pmt)
+                need = (long)sizeof t->pmt;
+            if (t->pmt_n >= need || t->pmt_n == (long)sizeof t->pmt)
+                ts_pmt(t, t->pmt, t->pmt_n < need ? t->pmt_n : need);
+        }
     } else if ((int)pid == t->vpid)
         ts_collect(t, 1, p + off, 188 - (long)off, pusi);
     else if ((int)pid == t->apid)

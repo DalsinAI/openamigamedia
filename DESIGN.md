@@ -107,9 +107,9 @@ headers only to say what they hold; it still never takes a container apart
   frames on every build). The work buffers (112 KB) are allocated per call.
 - **Where it lives:** `LIBS:openmedia.library` on disk (40 KB). The ROM is
   full; OpenUp installs the library with OpenFiles.
-- **Tests.** `tests/host/run.sh` makes 59 sample files with FFmpeg's
+- **Tests.** `tests/host/run.sh` makes 60 sample files with FFmpeg's
   command-line tool and `make_iff.py` (none is kept in the repository, and no
-  FFmpeg code is in the library), checks each against `samples.txt` (497
+  FFmpeg code is in the library), checks each against `samples.txt` (512
   checks: the values come from how each file was made, and the files of 64 KB
   or more again with the least budget), then cuts every file
   short at hundreds of lengths, changes bytes in its headers thousands of

@@ -32,6 +32,7 @@ ts_h264_eac3_51.ts      video     MTS  H264   EAC3    320 240 *     25  6  48000
 video.m2v               video     MPV  MP2V   -       320 240 *     25  *  *     *     *    0
 video.h264              video     264  H264   -       320 240 *     25  *  *     *     *    0
 ogv_theora_vorbis.ogv   video     OGG  THEO   VORB    320 240 *     25  2  48000 *     2000 60
+ogv_short_sound.ogv     video     OGG  THEO   VORB    320 240 *     25  2  48000 *     2000 60
 ogg_vorbis.ogg          sound     OGG  -      VORB    *   *   *     *   2  48000 *     2000 60
 opus.opus               sound     OGG  -      OPUS    *   *   *     *   2  48000 *     2000 60
 oga_flac.oga            sound     OGG  -      FLAC    *   *   *     *   1  44100 *     2000 60

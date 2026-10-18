@@ -108,8 +108,11 @@ int main(void)
         /* a pattern ("#?.mp4") is every file it matches, in the order the drawer has them */
         struct AnchorPath *ap = AllocVec(sizeof(struct AnchorPath) + 256, MEMF_CLEAR);
         LONG more;
-        if (!ap)
+        if (!ap) {
+            PrintFault(ERROR_NO_FREE_STORE, (STRPTR)"OpenMediaInfo");
+            rc = RETURN_FAIL;               /* the rest of the files aren't looked at */
             break;
+        }
         ap->ap_Strlen = 256;
         for (more = MatchFirst(*files, ap); more == 0; more = MatchNext(ap)) {
             LONG err = 0;
