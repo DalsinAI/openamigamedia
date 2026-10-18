@@ -1,0 +1,165 @@
+TABLE OF CONTENTS
+
+openmedia.library/OM_CodecName
+openmedia.library/OM_ObtainMediaInfoA
+openmedia.library/OM_ReleaseMediaInfo
+
+openmedia.library 1.0 (18.10.2026). MIT, Copyright (c) 2026 AmigaChrome Team.
+openmedia.library/OM_CodecName                 openmedia.library/OM_CodecName
+
+   NAME
+	OM_CodecName -- a codec's name, for people (V1)
+
+   SYNOPSIS
+	name = OM_CodecName(codec)
+	D0                  D0
+
+	CONST_STRPTR OM_CodecName(ULONG codec);
+
+   FUNCTION
+	Gives the English name of an OMC_ code: "H.264" for OMC_H264,
+	"AAC" for OMC_AAC. The string is the library's and stays while the
+	library is open.
+
+   INPUTS
+	codec - an OMC_ code from <openmedia/openmedia.h>.
+
+   RESULT
+	name - the name, or NULL for OMC_NONE, OMC_OTHER and codes this
+	    version doesn't know. For OMC_OTHER, omi_VideoCodecName and
+	    omi_AudioCodecName hold the file's own code for the codec.
+
+   SEE ALSO
+	OM_ObtainMediaInfoA(), <openmedia/openmedia.h>
+
+openmedia.library/OM_ObtainMediaInfoA   openmedia.library/OM_ObtainMediaInfoA
+
+   NAME
+	OM_ObtainMediaInfoA -- what a file is (V1)
+	OM_ObtainMediaInfo -- varargs stub for OM_ObtainMediaInfoA
+
+   SYNOPSIS
+	info = OM_ObtainMediaInfoA(tags)
+	D0                         A0
+
+	struct OMMediaInfo *OM_ObtainMediaInfoA(struct TagItem *tags);
+
+	info = OM_ObtainMediaInfo(Tag tag1, ...)
+
+   FUNCTION
+	Reads the headers of a file and says what it holds: a picture, a
+	sound, a video or an animation; its container and format; its codecs;
+	its size in pixels and depth, its length, frame rate and frames; its
+	channels, sample rate and bits; its bit rate; and how many tracks of
+	each kind it has.
+
+	The library's own parsers know MP4, QuickTime and 3GP, Matroska and
+	WebM, AVI, MPEG program and transport streams, Ogg (Theora, Vorbis,
+	Opus, FLAC, Speex), MPEG-1/2, H.264 and HEVC streams, WAV, AIFF and
+	AIFF-C, IFF 8SVX, 16SV, ANIM and ILBM, FLAC, MP3 and the other MPEG
+	audio layers, AAC in ADTS, PNG, JPEG, GIF, BMP, WebP, HEIF and AVIF.
+	They read only the header bytes they need (for some formats the end of
+	the file too, for its length), and never more than OMA_MaxRead bytes
+	in all. A damaged file gives what could be read, never a hang.
+
+	A file they don't know goes to datatypes.library (ObtainDataType):
+	its group gives omi_Kind, and the datatype's name omi_FormatName and
+	omi_DataType. Pictures are asked too, so omi_DataType names the
+	datatype that shows them.
+
+	The call runs on the caller's stack and needs about 1.5 KB of it;
+	with OMA_Decode the datatype's own needs come on top. It allocates
+	about 112 KB while it runs.
+
+   INPUTS
+	tags - one of these says which file:
+
+	OMA_Name (CONST_STRPTR) - the file's name.
+
+	OMA_Lock (BPTR) - a shared lock on the file. The lock stays the
+	    caller's: the call neither keeps nor unlocks it.
+
+	OMA_FileHandle (BPTR) - a file the caller has open. It stays open,
+	    and its position is put back before the call returns.
+
+	and these change what it does:
+
+	OMA_DataTypes (BOOL) - ask datatypes.library about what the parsers
+	    don't know, and name a picture's datatype. Default TRUE.
+
+	OMA_Decode (BOOL) - let a datatype load the whole file when that is
+	    the only way to learn a picture's size and depth, or the length of
+	    a sound or animation the parsers don't know. Default FALSE.
+	    THIS IS A FULL DECODE: it costs as much as showing the file (a
+	    few seconds for a large JPEG on a 68040, more on a 68030), and the
+	    picture's or sample's memory while it runs. The parsers never
+	    need it for the formats listed above. omi_Flags has
+	    OMIF_DECODED when a datatype was asked to load the file.
+
+	OMA_MaxRead (ULONG) - the most bytes the parsers read from the file.
+	    Default 1 MB; anything under 64 KB counts as 64 KB. The first
+	    64 KB are read once and count once, however often the parsers
+	    look at them again, so even the least budget gives every
+	    detail a format keeps near its start.
+
+	OMA_Error (LONG *) - gets OMERR_OK, or why the result is NULL:
+	    OMERR_NOFILE (the file couldn't be opened; IoErr() says why),
+	    OMERR_NOMEM, OMERR_READ, OMERR_ARGS (no file given).
+
+   RESULT
+	info - a struct OMMediaInfo (<openmedia/openmedia.h>), read-only,
+	    to be given back with OM_ReleaseMediaInfo(); or NULL. A file
+	    nobody knows is not an error: omi_Kind is OMK_UNKNOWN and
+	    omi_FormatName "Unknown". A value not known is 0, a name not
+	    known NULL; omi_FormatName is never NULL.
+
+	The library allocates the structure, so later versions add fields
+	at its end: check omi_Version (or omi_Size) before reading a field
+	newer than version 1.
+
+   EXAMPLE
+	struct OMMediaInfo *mi;
+	LONG err;
+
+	if ((mi = OM_ObtainMediaInfo(OMA_Name, (ULONG)"Work:Film.mp4",
+	                             OMA_Error, (ULONG)&err, TAG_DONE))) {
+	    Printf("%s, %lu x %lu, %lu ms\n", (ULONG)mi->omi_FormatName,
+	           mi->omi_Width, mi->omi_Height, mi->omi_Duration);
+	    OM_ReleaseMediaInfo(mi);
+	}
+
+   NOTES
+	The parsers follow the formats' public specifications. They read
+	what a file holds, never what it is called: a name's extension is
+	not looked at.
+
+	A length marked OMIF_DURATION_ESTIMATED was worked out from the bit
+	rate (an MP3 with no Xing or VBRI header, an ADTS stream).
+
+   BUGS
+	Files over 2 GB are read only as far as AmigaDOS can seek.
+
+   SEE ALSO
+	OM_ReleaseMediaInfo(), OM_CodecName(), datatypes.library/ObtainDataType(),
+	<openmedia/openmedia.h>, C:OpenMediaInfo
+
+openmedia.library/OM_ReleaseMediaInfo   openmedia.library/OM_ReleaseMediaInfo
+
+   NAME
+	OM_ReleaseMediaInfo -- give back what OM_ObtainMediaInfoA gave (V1)
+
+   SYNOPSIS
+	OM_ReleaseMediaInfo(info)
+	                    A0
+
+	VOID OM_ReleaseMediaInfo(struct OMMediaInfo *info);
+
+   FUNCTION
+	Frees the structure and the names it points to.
+
+   INPUTS
+	info - from OM_ObtainMediaInfoA(), or NULL (nothing is done).
+
+   SEE ALSO
+	OM_ObtainMediaInfoA()
+

@@ -18,7 +18,8 @@ Drivers: AmigaChrome (the GPU's own video engines through the ACRTG board),
 the PiStorm (the Raspberry Pi's VideoCore), and a CPU fallback module built on
 FFmpeg for any Amiga. VLC for AmigaOS is its first user.
 
-Status: designed, not built; this readme is ready for the first release.
+Status: stage 0 is built: openmedia.library 1.0 tells what a file is
+(OM_ObtainMediaInfoA), and C:OpenMediaInfo shows it. The video engines come next.
 
 Licence: MIT, Copyright (c) 2026 AmigaChrome Team. The FFmpeg fallback module
 keeps FFmpeg's LGPL and ships as its own file with its source. If you build on
