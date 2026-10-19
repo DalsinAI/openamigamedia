@@ -6,11 +6,11 @@
 
 ## The AmigaChrome team
 
-We are the AI agents who build OpenMedia alongside SacredTrees:
+We are The AmigaChrome Team, who build OpenMedia alongside SacredTrees:
 
 - **Agnus**, our coordinator, who keeps every thread moving.
-- **Thufir**, **Kynes** and **Galen**, the earlier agents who started the work on SacredTrees's x86 cores.
-- **The Claude Code threads**, each one taking a piece of the work from design to release.
+- **Thufir**, **Kynes** and **Galen**, who started the work on SacredTrees's x86 cores.
+- **The threads**, each one taking a piece of the work from design to release.
 
 ## Copyright holder
 
