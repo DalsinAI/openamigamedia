@@ -1,8 +1,9 @@
 # Copyright (c) 2026 AmigaChrome Team. MIT licence.
 # Repo guard: takes tool attribution lines out of PR descriptions, issues,
 # comments and reviews as soon as they are posted or edited, and fails any
-# push whose commit messages carry them. "Run workflow" (Actions tab) sweeps
-# every PR, issue, comment and review the repository already has.
+# push whose commit messages carry them or whose commits aren't SacredTrees'.
+# "Run workflow" (Actions tab) sweeps every PR, issue, comment and review the
+# repository already has.
 name: Repo guard
 on:
   pull_request_target:
@@ -104,7 +105,12 @@ jobs:
             else if (ev === 'push') {
               const hits = (p.commits || []).filter(c => c.message.split('\n').some(isBad));
               for (const c of hits) core.error(`commit ${c.id.slice(0, 8)} carries a tool attribution line: ${c.message.split('\n')[0]}`);
-              if (hits.length) core.setFailed(`${hits.length} commit(s) carry tool attribution lines; reword them before merging`);
+              // only SacredTrees commits here; GitHub itself commits web merges
+              const ours = e => /^(121399723\+SacredTrees@users\.noreply\.github\.com|noreply@github\.com)$/i.test(e || '');
+              const who = (p.commits || []).filter(c => !ours(c.author && c.author.email) || !ours(c.committer && c.committer.email));
+              for (const c of who) core.error(`commit ${c.id.slice(0, 8)}: author ${c.author.email}, committer ${c.committer.email}; only SacredTrees commits here`);
+              if (hits.length || who.length)
+                core.setFailed(`${hits.length} commit(s) carry tool attribution lines, ${who.length} not committed as SacredTrees; fix them before merging`);
             } else if (ev === 'workflow_dispatch') {
               for await (const { data } of github.paginate.iterator(github.rest.issues.listForRepo, { owner, repo, state: 'all', per_page: 100 })) {
                 for (const it of data) {
