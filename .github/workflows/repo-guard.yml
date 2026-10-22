@@ -22,7 +22,8 @@ permissions:
   issues: write
   pull-requests: write
 concurrency:
-  group: repo-guard-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.issue.number || github.ref }}
+  # one group per item, so a burst of comments never cancels a queued run
+  group: repo-guard-${{ github.event_name }}-${{ github.event.comment.id || github.event.review.id || github.event.pull_request.number || github.event.issue.number || github.sha }}
 jobs:
   guard:
     runs-on: ubuntu-latest
@@ -81,11 +82,25 @@ jobs:
             const reviewComment = c => fix(`review comment ${c.id}`, c.body,
               b => github.rest.pulls.updateReviewComment({ owner, repo, comment_id: c.id, body: b }));
 
-            if (ev === 'pull_request_target') await prBody(p.pull_request.number, p.pull_request.body);
-            else if (ev === 'issues') await issueBody(p.issue.number, p.issue.body);
-            else if (ev === 'issue_comment') await comment(p.comment);
-            else if (ev === 'pull_request_review') await review(p.pull_request.number, p.review);
-            else if (ev === 'pull_request_review_comment') await reviewComment(p.comment);
+            // read the item as it is now, so a later edit is never overwritten
+            const now = async (what, fn) => (await attempt(what, fn) || {}).data;
+            let cur;
+            if (ev === 'pull_request_target') {
+              if (cur = await now(`PR #${p.pull_request.number}`, () => github.rest.pulls.get({ owner, repo, pull_number: p.pull_request.number })))
+                await prBody(cur.number, cur.body);
+            } else if (ev === 'issues') {
+              if (cur = await now(`issue #${p.issue.number}`, () => github.rest.issues.get({ owner, repo, issue_number: p.issue.number })))
+                await issueBody(cur.number, cur.body);
+            } else if (ev === 'issue_comment') {
+              if (cur = await now(`comment ${p.comment.id}`, () => github.rest.issues.getComment({ owner, repo, comment_id: p.comment.id })))
+                await comment(cur);
+            } else if (ev === 'pull_request_review') {
+              if (cur = await now(`review ${p.review.id}`, () => github.rest.pulls.getReview({ owner, repo, pull_number: p.pull_request.number, review_id: p.review.id })))
+                await review(p.pull_request.number, cur);
+            } else if (ev === 'pull_request_review_comment') {
+              if (cur = await now(`review comment ${p.comment.id}`, () => github.rest.pulls.getReviewComment({ owner, repo, comment_id: p.comment.id })))
+                await reviewComment(cur);
+            }
             else if (ev === 'push') {
               const hits = (p.commits || []).filter(c => c.message.split('\n').some(isBad));
               for (const c of hits) core.error(`commit ${c.id.slice(0, 8)} carries a tool attribution line: ${c.message.split('\n')[0]}`);
