@@ -2,8 +2,10 @@
 # Repo guard: takes tool attribution lines out of PR descriptions, issues,
 # comments and reviews as soon as they are posted or edited, and fails any
 # push whose commit messages carry them or whose commits aren't SacredTrees'.
-# "Run workflow" (Actions tab) sweeps every PR, issue, comment and review the
-# repository already has.
+# It also takes out what other review bots leave (their comments go, their
+# review text is blanked). "Run workflow" (Actions tab) sweeps every PR, issue,
+# comment and review the repository already has, and the sweep runs on its own
+# every three days.
 name: Repo guard
 on:
   pull_request_target:
@@ -18,6 +20,8 @@ on:
     types: [created, edited]
   push:
   workflow_dispatch:
+  schedule:
+    - cron: '17 4 */3 * *'
 permissions:
   contents: read
   issues: write
@@ -45,6 +49,11 @@ jobs:
               new RegExp(`noreply@${B}\\.com`, 'i'),
             ];
             const isBad = l => bad.some(r => r.test(l));
+            // other review bots: their comments are deleted, their review text blanked
+            const bots = new RegExp(`(${n('Y29kZXg=')}|${n('Z3Jvaw==')})`, 'i');
+            const isBot = u => !!u && u.type === 'Bot' && bots.test(u.login || '');
+            const BLANK = '<!-- removed -->';
+            const blank = t => /^\s*(<!--[\s\S]*?-->\s*)*$/.test(t || '');
             function clean(text) {
               if (!text) return text;
               const lines = text.split(/\r?\n/);
@@ -76,12 +85,20 @@ jobs:
               b => github.rest.pulls.update({ owner, repo, pull_number: num, body: b }));
             const issueBody = (num, body) => fix(`issue #${num}`, body,
               b => github.rest.issues.update({ owner, repo, issue_number: num, body: b }));
-            const comment = c => fix(`comment ${c.id}`, c.body,
+            const fixComment = c => fix(`comment ${c.id}`, c.body,
               b => github.rest.issues.updateComment({ owner, repo, comment_id: c.id, body: b }));
-            const review = (num, r) => fix(`review ${r.id} on #${num}`, r.body,
-              b => github.rest.pulls.updateReview({ owner, repo, pull_number: num, review_id: r.id, body: b }));
-            const reviewComment = c => fix(`review comment ${c.id}`, c.body,
-              b => github.rest.pulls.updateReviewComment({ owner, repo, comment_id: c.id, body: b }));
+            const drop = (kind, fn) => attempt(kind, async () => { await fn(); fixed++; core.info(`removed ${kind}`); });
+            const comment = c => isBot(c.user)
+              ? drop(`bot comment ${c.id}`, () => github.rest.issues.deleteComment({ owner, repo, comment_id: c.id }))
+              : fixComment(c);
+            const updateReview = (num, r, b) => github.rest.pulls.updateReview({ owner, repo, pull_number: num, review_id: r.id, body: b });
+            const review = (num, r) => isBot(r.user)
+              ? (!blank(r.body) ? drop(`bot review ${r.id} on #${num}`, () => updateReview(num, r, BLANK)) : undefined)
+              : fix(`review ${r.id} on #${num}`, r.body, b => updateReview(num, r, b));
+            const reviewComment = c => isBot(c.user)
+              ? drop(`bot review comment ${c.id}`, () => github.rest.pulls.deleteReviewComment({ owner, repo, comment_id: c.id }))
+              : fix(`review comment ${c.id}`, c.body,
+                  b => github.rest.pulls.updateReviewComment({ owner, repo, comment_id: c.id, body: b }));
 
             // read the item as it is now, so a later edit is never overwritten
             const now = async (what, fn) => (await attempt(what, fn) || {}).data;
@@ -111,7 +128,7 @@ jobs:
               for (const c of who) core.error(`commit ${c.id.slice(0, 8)}: author ${c.author.email}, committer ${c.committer.email}; only SacredTrees commits here`);
               if (hits.length || who.length)
                 core.setFailed(`${hits.length} commit(s) carry tool attribution lines, ${who.length} not committed as SacredTrees; fix them before merging`);
-            } else if (ev === 'workflow_dispatch') {
+            } else if (ev === 'workflow_dispatch' || ev === 'schedule') {
               for await (const { data } of github.paginate.iterator(github.rest.issues.listForRepo, { owner, repo, state: 'all', per_page: 100 })) {
                 for (const it of data) {
                   if (it.pull_request) {
