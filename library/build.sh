@@ -6,7 +6,7 @@
 # The headers in include/clib, include/inline, include/proto,
 # include/pragmas and fd/ are made from library/gfopenmedia_lib.sfd by
 # GFOpenNDK's tools/ndkgen.py.
-# MIT, Copyright (c) 2026 AmigaChrome Team.
+# MIT, Copyright (c) 2026 AmiCradle Team.
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(cd "$HERE/.." && pwd)

@@ -5,7 +5,7 @@
 # make_iff.py. FFmpeg only makes the files: none of its code is in
 # gfopenmedia.library, and no sample is kept in the repository.
 #   tests/host/make_samples.sh [OUT]
-# MIT, Copyright (c) 2026 AmigaChrome Team.
+# MIT, Copyright (c) 2026 AmiCradle Team.
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 OUT=${1:-$HERE/samples}

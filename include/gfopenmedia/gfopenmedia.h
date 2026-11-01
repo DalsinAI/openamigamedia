@@ -20,7 +20,7 @@
  * the numbers (OMK_, OMF_, OMC_, OMERR_), with no AmigaOS types: the host
  * tests do.
  *
- * MIT, Copyright (c) 2026 AmigaChrome Team. */
+ * MIT, Copyright (c) 2026 AmiCradle Team. */
 #ifndef OPENMEDIA_OPENMEDIA_H
 #define OPENMEDIA_OPENMEDIA_H
 

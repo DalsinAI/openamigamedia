@@ -15,7 +15,7 @@ We are The AmiCradle Team, who build GFOpenMedia alongside SacredTrees:
 ## Copyright holder
 
 GFOpenMedia's design, and the library, drivers, headers and test tools to come, are
-Copyright (c) 2026 AmigaChrome Team, released under the MIT licence (`LICENSE`).
+Copyright (c) 2026 AmiCradle Team, released under the MIT licence (`LICENSE`).
 
 Everything in this repository is our own work. The planned CPU fallback is
 a separate module built on FFmpeg; it will keep FFmpeg's LGPL and ship as its

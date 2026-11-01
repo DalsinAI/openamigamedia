@@ -5,7 +5,7 @@
  * loop has a fixed bound, so a damaged or hostile file ends in an answer
  * (perhaps a partial one), never a hang or a crash.
  *
- * MIT, Copyright (c) 2026 AmigaChrome Team. */
+ * MIT, Copyright (c) 2026 AmiCradle Team. */
 #define OPENMEDIA_CONSTANTS_ONLY
 #include "../include/gfopenmedia/gfopenmedia.h"
 #include "om_probe.h"

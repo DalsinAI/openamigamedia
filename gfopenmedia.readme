@@ -21,7 +21,7 @@ FFmpeg for any Amiga. VLC for AmigaOS is its first user.
 Status: stage 0 is built: gfopenmedia.library 1.0 tells what a file is
 (OM_ObtainMediaInfoA), and C:GFOpenMediaInfo shows it. The video engines come next.
 
-Licence: MIT, Copyright (c) 2026 AmigaChrome Team. The FFmpeg fallback module
+Licence: MIT, Copyright (c) 2026 AmiCradle Team. The FFmpeg fallback module
 keeps FFmpeg's LGPL and ships as its own file with its source. If you build on
 it, we ask that you credit the AmiCradle Team.
 

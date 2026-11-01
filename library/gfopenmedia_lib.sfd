@@ -1,6 +1,6 @@
 ==id $Id: gfopenmedia_lib.sfd 1.0 (18.10.2026) $
 * "gfopenmedia.library"
-* MIT, Copyright (c) 2026 AmigaChrome Team.
+* MIT, Copyright (c) 2026 AmiCradle Team.
 ==base _OpenMediaBase
 ==basetype struct Library *
 ==libname gfopenmedia.library

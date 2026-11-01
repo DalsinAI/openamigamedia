@@ -1,7 +1,7 @@
 """Writes small Amiga IFF files for the host tests, from EA IFF 85 and its
 ILBM, 8SVX and ANIM forms: two pictures, an animation and three sounds.
    python3 make_iff.py OUT_DIR
-MIT, Copyright (c) 2026 AmigaChrome Team."""
+MIT, Copyright (c) 2026 AmiCradle Team."""
 import os
 import struct
 import sys

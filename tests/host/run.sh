@@ -3,7 +3,7 @@
 # tool and make_iff.py), checks every file against samples.txt, then the fuzz cases, all
 # under AddressSanitizer and UndefinedBehaviorSanitizer.
 #   tests/host/run.sh [SAMPLES_DIR] [FUZZ_ROUNDS]
-# MIT, Copyright (c) 2026 AmigaChrome Team.
+# MIT, Copyright (c) 2026 AmiCradle Team.
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(cd "$HERE/../.." && pwd)

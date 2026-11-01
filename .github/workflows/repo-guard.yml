@@ -1,4 +1,4 @@
-# Copyright (c) 2026 AmigaChrome Team. MIT licence.
+# Copyright (c) 2026 AmiCradle Team. MIT licence.
 # Repo guard: takes tool attribution lines out of PR descriptions, issues,
 # comments and reviews as soon as they are posted or edited, and fails any
 # push whose commit messages carry them or whose commits aren't SacredTrees'.

@@ -1,6 +1,6 @@
 /* The few C library calls GCC may make on its own (structure copies and
  * clears), for a library built with no C library.
- * MIT, Copyright (c) 2026 AmigaChrome Team. */
+ * MIT, Copyright (c) 2026 AmiCradle Team. */
 #include <stddef.h>
 
 void *memset(void *d, int c, size_t n)

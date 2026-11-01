@@ -17,7 +17,7 @@
  * buffer is allocated per call; the library keeps no writable globals.
  * Built bare (no startup code or C library) by library/build.sh.
  *
- * MIT, Copyright (c) 2026 AmigaChrome Team. */
+ * MIT, Copyright (c) 2026 AmiCradle Team. */
 #include <exec/types.h>
 #include <exec/resident.h>
 #include <exec/libraries.h>
