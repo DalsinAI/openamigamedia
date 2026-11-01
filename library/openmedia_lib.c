@@ -1,4 +1,4 @@
-/* openmedia.library 1.0: stage 0, what a file is (DESIGN.md section 6).
+/* gfopenmedia.library 1.0: stage 0, what a file is (DESIGN.md section 6).
  *
  * OM_ObtainMediaInfoA opens the file (by name, from a lock, or a file the
  * caller has open), lets om_probe.c's parsers read its headers within a
@@ -35,7 +35,7 @@
 #include <proto/dos.h>
 #include <proto/datatypes.h>
 
-#include "../include/openmedia/openmedia.h"
+#include "../include/gfopenmedia/gfopenmedia.h"
 #include "om_probe.h"
 
 #define REG(r, decl) register decl __asm(#r)   /* an argument in a register */
@@ -72,9 +72,9 @@ struct omi_block {
  * in the file: build.sh keeps source order (-fno-toplevel-reorder). */
 int start(void) { return -1; }
 
-static const char lib_name[] = "openmedia.library";
-static const char lib_id[] = "openmedia.library 1.0 (18.10.2026) OpenMedia, AmigaChrome Team\r\n";
-static const char lib_ver[] __attribute__((used)) = "\0$VER: openmedia.library 1.0 (18.10.2026) OpenMedia, AmigaChrome Team";
+static const char lib_name[] = "gfopenmedia.library";
+static const char lib_id[] = "gfopenmedia.library 1.0 (18.10.2026) GFOpenMedia, AmiCradle Team\r\n";
+static const char lib_ver[] __attribute__((used)) = "\0$VER: gfopenmedia.library 1.0 (18.10.2026) GFOpenMedia, AmiCradle Team";
 
 static struct Library *lib_init(REG(d0, struct OpenMediaBase *base), REG(a0, BPTR seglist), REG(a6, struct ExecBase *sys));
 static struct Library *lib_open(REG(a6, struct OpenMediaBase *base));

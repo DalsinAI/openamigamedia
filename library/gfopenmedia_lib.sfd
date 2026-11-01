@@ -1,14 +1,14 @@
-==id $Id: openmedia_lib.sfd 1.0 (18.10.2026) $
-* "openmedia.library"
+==id $Id: gfopenmedia_lib.sfd 1.0 (18.10.2026) $
+* "gfopenmedia.library"
 * MIT, Copyright (c) 2026 AmigaChrome Team.
 ==base _OpenMediaBase
 ==basetype struct Library *
-==libname openmedia.library
+==libname gfopenmedia.library
 ==bias 30
 ==public
 ==include <exec/types.h>
 ==include <utility/tagitem.h>
-==include <openmedia/openmedia.h>
+==include <gfopenmedia/gfopenmedia.h>
 * Version 1, stage 0: what a file is
 struct OMMediaInfo * OM_ObtainMediaInfoA(struct TagItem * tags)(a0)
 ==varargs

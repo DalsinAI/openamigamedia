@@ -1,4 +1,4 @@
-/* openmedia.library's public interface.
+/* gfopenmedia.library's public interface.
  *
  * Stage 0 (version 1): what a file is. One call reads only the bytes it
  * needs from a file's headers and says what the file holds: a picture, a
@@ -24,14 +24,14 @@
 #ifndef OPENMEDIA_OPENMEDIA_H
 #define OPENMEDIA_OPENMEDIA_H
 
-#define OPENMEDIA_NAME    "openmedia.library"
+#define OPENMEDIA_NAME    "gfopenmedia.library"
 #define OPENMEDIA_VERSION 1     /* stage 0: OM_ObtainMediaInfoA and its two companions */
 
 /* A four-letter code, as IFF's MAKE_ID */
 #define OM_ID(a, b, c, d) (((unsigned long)(a) << 24) | ((unsigned long)(b) << 16) | ((unsigned long)(c) << 8) | (unsigned long)(d))
 
 /* ---- omi_Kind: what the file holds ---- */
-#define OMK_UNKNOWN    0        /* nothing openmedia.library or a datatype knows */
+#define OMK_UNKNOWN    0        /* nothing gfopenmedia.library or a datatype knows */
 #define OMK_PICTURE    1
 #define OMK_SOUND      2        /* sampled sound */
 #define OMK_VIDEO      3        /* moving pictures in a container, with or without sound */

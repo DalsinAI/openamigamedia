@@ -1,4 +1,4 @@
-/* Host tests for openmedia.library's parsers (library/om_probe.c).
+/* Host tests for gfopenmedia.library's parsers (library/om_probe.c).
  *
  *   test_probe FILE...                  what each file is, one line each
  *   test_probe --check LIST DIR         each file in LIST (samples.txt) against what it should be
@@ -9,7 +9,7 @@
  * MIT, Copyright (c) 2026 AmigaChrome Team. */
 #define _FILE_OFFSET_BITS 64
 #define OPENMEDIA_CONSTANTS_ONLY
-#include "../../include/openmedia/openmedia.h"
+#include "../../include/gfopenmedia/gfopenmedia.h"
 #include "../../library/om_probe.h"
 
 #include <dirent.h>

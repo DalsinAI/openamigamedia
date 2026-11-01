@@ -1,11 +1,11 @@
-/* OpenMediaInfo: what openmedia.library says a file is, from the Shell.
+/* GFOpenMediaInfo: what gfopenmedia.library says a file is, from the Shell.
  *
- *   OpenMediaInfo FILE/M/A,DECODE/S,NODATATYPES/S,MAXREAD/K/N,LINE/S
+ *   GFOpenMediaInfo FILE/M/A,DECODE/S,NODATATYPES/S,MAXREAD/K/N,LINE/S
  *
  * FILE takes names and patterns ("Work:Films/#?.mp4").
  *
  * DECODE lets a datatype load a picture or sound when that is the only way
- * to learn its size (OMA_Decode); NODATATYPES asks only openmedia.library's
+ * to learn its size (OMA_Decode); NODATATYPES asks only gfopenmedia.library's
  * own parsers; MAXREAD is OMA_MaxRead in bytes; LINE prints one line a
  * file, in the host tests' form, so a lab's answers compare with the host's.
  *
@@ -17,11 +17,11 @@
 #include <exec/memory.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include <proto/openmedia.h>
+#include <proto/gfopenmedia.h>
 
 struct Library *OpenMediaBase;
 
-static const char version[] __attribute__((used)) = "$VER: OpenMediaInfo 1.0 (18.10.2026) MIT, Copyright (c) 2026 AmigaChrome Team";
+static const char version[] __attribute__((used)) = "$VER: GFOpenMediaInfo 1.0 (18.10.2026) MIT, Copyright (c) 2026 AmigaChrome Team";
 
 static const char *const kinds[] = { "unknown", "picture", "sound", "video", "animation", "music", "text", "document", "other" };
 
@@ -96,11 +96,11 @@ int main(void)
     int rc = RETURN_OK;
     STRPTR *files;
     if (!rda) {
-        PrintFault(IoErr(), (STRPTR)"OpenMediaInfo");
+        PrintFault(IoErr(), (STRPTR)"GFOpenMediaInfo");
         return RETURN_FAIL;
     }
     if (!(OpenMediaBase = OpenLibrary((STRPTR)OPENMEDIA_NAME, OPENMEDIA_VERSION))) {
-        PutStr((STRPTR)"OpenMediaInfo: openmedia.library 1 isn't in LIBS:\n");
+        PutStr((STRPTR)"GFOpenMediaInfo: gfopenmedia.library 1 isn't in LIBS:\n");
         FreeArgs(rda);
         return RETURN_FAIL;
     }
@@ -109,7 +109,7 @@ int main(void)
         struct AnchorPath *ap = AllocVec(sizeof(struct AnchorPath) + 256, MEMF_CLEAR);
         LONG more;
         if (!ap) {
-            PrintFault(ERROR_NO_FREE_STORE, (STRPTR)"OpenMediaInfo");
+            PrintFault(ERROR_NO_FREE_STORE, (STRPTR)"GFOpenMediaInfo");
             rc = RETURN_FAIL;               /* the rest of the files aren't looked at */
             break;
         }

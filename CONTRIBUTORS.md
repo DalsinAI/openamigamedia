@@ -2,11 +2,11 @@
 
 ## Creator and maintainer
 
-- **SacredTrees** ([@SacredTrees](https://github.com/SacredTrees)): created OpenMedia, designs it and maintains it.
+- **SacredTrees** ([@SacredTrees](https://github.com/SacredTrees)): created GFOpenMedia, designs it and maintains it.
 
-## The AmigaChrome team
+## The AmiCradle team
 
-We are The AmigaChrome Team, who build OpenMedia alongside SacredTrees:
+We are The AmiCradle Team, who build GFOpenMedia alongside SacredTrees:
 
 - **Agnus**, our coordinator, who keeps every thread moving.
 - **Thufir**, **Kynes** and **Galen**, who started the work on SacredTrees's x86 cores.
@@ -14,7 +14,7 @@ We are The AmigaChrome Team, who build OpenMedia alongside SacredTrees:
 
 ## Copyright holder
 
-OpenMedia's design, and the library, drivers, headers and test tools to come, are
+GFOpenMedia's design, and the library, drivers, headers and test tools to come, are
 Copyright (c) 2026 AmigaChrome Team, released under the MIT licence (`LICENSE`).
 
 Everything in this repository is our own work. The planned CPU fallback is

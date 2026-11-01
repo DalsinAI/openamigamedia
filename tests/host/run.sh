@@ -1,5 +1,5 @@
 #!/bin/sh
-# openmedia.library's host tests: makes the samples (make_samples.sh, FFmpeg's command-line
+# gfopenmedia.library's host tests: makes the samples (make_samples.sh, FFmpeg's command-line
 # tool and make_iff.py), checks every file against samples.txt, then the fuzz cases, all
 # under AddressSanitizer and UndefinedBehaviorSanitizer.
 #   tests/host/run.sh [SAMPLES_DIR] [FUZZ_ROUNDS]

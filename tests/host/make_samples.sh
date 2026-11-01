@@ -1,9 +1,9 @@
 #!/bin/sh
 # Makes the host tests' sample files in OUT (default ./samples): short
-# videos, sounds and pictures in every format openmedia.library's parsers
+# videos, sounds and pictures in every format gfopenmedia.library's parsers
 # read, made with FFmpeg's command-line tool, and the Amiga IFF files with
 # make_iff.py. FFmpeg only makes the files: none of its code is in
-# openmedia.library, and no sample is kept in the repository.
+# gfopenmedia.library, and no sample is kept in the repository.
 #   tests/host/make_samples.sh [OUT]
 # MIT, Copyright (c) 2026 AmigaChrome Team.
 set -eu
