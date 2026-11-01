@@ -1,5 +1,5 @@
 # What each file make_samples.sh makes should be found to be. "*" is not checked, "-" is none.
-# MIT, Copyright (c) 2026 AmigaChrome Team.
+# MIT, Copyright (c) 2026 AmiCradle Team.
 # Every value comes from how the file was made (2 seconds, 320 x 240 at 25 frames a second,
 # 48 kHz or 44.1 kHz sine tones), not from what the parsers said.
 # file                  kind      cont vcodec acodec  w   h   depth fps ch rate  bits  ms   +/-ms

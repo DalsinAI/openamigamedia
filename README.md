@@ -34,15 +34,15 @@ It works on AmiCradle, PiStorm and real Amigas.
 
 ## Licence
 
-MIT, Copyright (c) 2026 AmigaChrome Team (`LICENSE`). This covers the library,
+MIT, Copyright (c) 2026 AmiCradle Team (`LICENSE`). This covers the library,
 the drivers, the headers and the test tools. The CPU fallback is a separate
 optional module built on FFmpeg; it keeps FFmpeg's LGPL and ships as its own
 file with its source.
 
 If you use or build on this work, we ask (we do not require) that you credit
-the AmigaChrome Team, for example "based on GFOpenMedia by the AmigaChrome
+the AmiCradle Team, for example "based on GFOpenMedia by the AmiCradle
 Team".
 
 ## Contributors
 
-OpenMedia is created and maintained by [SacredTrees](https://github.com/SacredTrees) with The AmigaChrome Team, copyright AmigaChrome Team. Everyone whose work it includes is credited in [`CONTRIBUTORS.md`](CONTRIBUTORS.md).
+OpenMedia is created and maintained by [SacredTrees](https://github.com/SacredTrees) with The AmiCradle Team, copyright AmiCradle Team. Everyone whose work it includes is credited in [`CONTRIBUTORS.md`](CONTRIBUTORS.md).

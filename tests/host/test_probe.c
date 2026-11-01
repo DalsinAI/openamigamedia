@@ -6,7 +6,7 @@
  *                                       made-up hostile headers: each probe must come back, within
  *                                       its read budget (run under AddressSanitizer by run.sh)
  *
- * MIT, Copyright (c) 2026 AmigaChrome Team. */
+ * MIT, Copyright (c) 2026 AmiCradle Team. */
 #define _FILE_OFFSET_BITS 64
 #define OPENMEDIA_CONSTANTS_ONLY
 #include "../../include/gfopenmedia/gfopenmedia.h"

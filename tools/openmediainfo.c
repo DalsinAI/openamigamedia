@@ -9,7 +9,7 @@
  * own parsers; MAXREAD is OMA_MaxRead in bytes; LINE prints one line a
  * file, in the host tests' form, so a lab's answers compare with the host's.
  *
- * MIT, Copyright (c) 2026 AmigaChrome Team. */
+ * MIT, Copyright (c) 2026 AmiCradle Team. */
 #include <exec/types.h>
 #include <dos/dos.h>
 #include <dos/rdargs.h>
@@ -21,7 +21,7 @@
 
 struct Library *OpenMediaBase;
 
-static const char version[] __attribute__((used)) = "$VER: GFOpenMediaInfo 1.0 (18.10.2026) MIT, Copyright (c) 2026 AmigaChrome Team";
+static const char version[] __attribute__((used)) = "$VER: GFOpenMediaInfo 1.0 (18.10.2026) MIT, Copyright (c) 2026 AmiCradle Team";
 
 static const char *const kinds[] = { "unknown", "picture", "sound", "video", "animation", "music", "text", "document", "other" };
 

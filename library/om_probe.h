@@ -16,7 +16,7 @@
  * Electronic Arts' EA IFF 85 with ILBM, 8SVX and ANIM, PNG (ISO/IEC 15948),
  * JPEG (ITU-T T.81), GIF89a, the BMP headers, and WebP's RIFF container.
  *
- * MIT, Copyright (c) 2026 AmigaChrome Team. */
+ * MIT, Copyright (c) 2026 AmiCradle Team. */
 #ifndef OM_PROBE_H
 #define OM_PROBE_H
 
