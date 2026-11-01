@@ -1,15 +1,15 @@
-# OpenMedia: design
+# GFOpenMedia: design
 
-We, 4 October 2026: "can we port VLC to the Amiga based on our OpenRTG,
-OpenGPU, and the not specified openmediahardware project; that work will
+We, 4 October 2026: "can we port VLC to the Amiga based on our GFOpenRTG,
+GFOpenGPU, and the not specified openmediahardware project; that work will
 drive that media hardware idea, i.e. expose a graphics chip's H.264, H.265
-etc hardware encoding". OpenMedia is that project. As the browser drives
-OpenRTG, OpenGPU and OpenSocket, VLC drives OpenMedia.
+etc hardware encoding". GFOpenMedia is that project. As the browser drives
+GFOpenRTG, GFOpenGPU and GFOpenSocket, VLC drives GFOpenMedia.
 
-## 1. openmedia.library
+## 1. gfopenmedia.library
 
 One library with a driver per piece of video hardware, in the same shape as
-OpenGPU (OpenRTG's design, section 5):
+GFOpenGPU (GFOpenRTG's design, section 5):
 
 - **Sessions.** A program opens a decoder or an encoder for a codec (H.264,
   H.265/HEVC, VP9, AV1, MPEG-2, VC-1, JPEG) and a profile. It asks first what
@@ -17,50 +17,50 @@ OpenGPU (OpenRTG's design, section 5):
   or encode. Each driver answers fully, partly or not, as Warp3D's queries
   do.
 - **Surfaces.** Decoded frames go into surfaces in video RAM (NV12, P010 or
-  RGB). OpenGPU converts, scales and composites them onto an OpenRTG screen
+  RGB). GFOpenGPU converts, scales and composites them onto a GFOpenRTG screen
   with no copy through the CPU. The same surfaces feed an encoder.
 - **Buffers in, frames out.** Compressed data goes in one access unit at a
   time, and frames come back with their times. The library never parses
   containers; that is the player's job.
 - **The CPU fallback is a separate, optional module** (FFmpeg, LGPL, loaded at
-  run time). `openmedia.library` itself stays MIT, and the fallback keeps its
+  run time). `gfopenmedia.library` itself stays MIT, and the fallback keeps its
   own licence.
 
 ## 2. Drivers
 
-Drivers live in `LIBS:OpenMedia/`, named for their hardware, the way
-OpenGPU's are (`ACRTG.gpu`). The names below are proposals.
+Drivers live in `LIBS:GFOpenMedia/`, named for their hardware, the way
+GFOpenGPU's are (`ACRTG.gpu`). The names below are proposals.
 
 | Driver | Hardware | How |
 | --- | --- | --- |
-| `ACRTG.media` | AmigaChrome | The runtime's media unit on the ACRTG board. Each session runs on the PC's own video hardware through VA-API (Intel and AMD) or NVDEC and NVENC, with FFmpeg on the host as the fallback. Frames land straight in the board's video RAM, so the Amiga gets fast hardware decode and encode while the PC does the work. |
-| `VideoCore.media` | PiStorm | The Raspberry Pi's video decoders through Emu68, as a provider, the way OpenMulticore's providers work. A Pi 4 (BCM2711) decodes H.264 and HEVC. A Pi 5 or CM5 (BCM2712) decodes HEVC only: it has no H.264 decoder and no hardware encoder, so H.264 there goes to `CPU.media` on the Pi's ARM cores (checked 4 October 2026). |
+| `ACRTG.media` | AmiCradle | The runtime's media unit on the ACRTG board. Each session runs on the PC's own video hardware through VA-API (Intel and AMD) or NVDEC and NVENC, with FFmpeg on the host as the fallback. Frames land straight in the board's video RAM, so the Amiga gets fast hardware decode and encode while the PC does the work. |
+| `VideoCore.media` | PiStorm | The Raspberry Pi's video decoders through Emu68, as a provider, the way GFOpenMulticore's providers work. A Pi 4 (BCM2711) decodes H.264 and HEVC. A Pi 5 or CM5 (BCM2712) decodes HEVC only: it has no H.264 decoder and no hardware encoder, so H.264 there goes to `CPU.media` on the Pi's ARM cores (checked 4 October 2026). |
 | `CPU.media` | Any Amiga | The FFmpeg module: LGPL, its own file, its source with it. |
 | Real cards | Where a chip's video engine is documented | Most classic Amiga cards have none, so the CPU module or a PiStorm is the path there. |
 
 ## 3. Its users
 
-- **VLC for AmigaOS** (`DalsinAI/openamigavlc`): its OpenMedia decoder module,
-  hardware first (H.264, then HEVC). Its video output composites OpenMedia's
-  surfaces through OpenRTG and OpenGPU.
-- **The screen recorder** (an AmigaChrome idea): an instance's picture encoded
-  by the PC's hardware through OpenMedia's encoder.
+- **VLC for AmigaOS** (`DalsinAI/openamigavlc`): its GFOpenMedia decoder module,
+  hardware first (H.264, then HEVC). Its video output composites GFOpenMedia's
+  surfaces through GFOpenRTG and GFOpenGPU.
+- **The screen recorder** (an AmiCradle idea): an instance's picture encoded
+  by the PC's hardware through GFOpenMedia's encoder.
 - Any program can use it: a viewer, a video editor, a datatype.
 
 ## 4. Phases
 
 | Phase | Delivers | Done when |
 | --- | --- | --- |
-| 1 | The interface and headers; `ACRTG.media` with VA-API and FFmpeg on the host; H.264 decode into a surface; a test player | A 1080p H.264 file plays smoothly on an OpenRTG monitor in AmigaChrome |
-| 2 | What VLC's port needs (openamigavlc phase 2) | VLC plays a local file and a network stream through OpenMedia |
+| 1 | The interface and headers; `ACRTG.media` with VA-API and FFmpeg on the host; H.264 decode into a surface; a test player | A 1080p H.264 file plays smoothly on a GFOpenRTG monitor in AmiCradle |
+| 2 | What VLC's port needs (openamigavlc phase 2) | VLC plays a local file and a network stream through GFOpenMedia |
 | 3 | HEVC, VP9 and AV1; encode (H.264, HEVC) | A screen recorded from an instance, encoded by the PC's hardware |
 | 4 | `VideoCore.media` for the PiStorm; `CPU.media` | Playback on a PiStorm, and on a real Amiga through the CPU module |
 | 5 | The Installer; Aminet (util/libs) | |
 
 ## 6. Stage 0: what a file is (version 1, 18 October 2026)
 
-Dale, 18 October 2026: OpenFiles' Information window gets "file properties
-and image format. This will come from our openmedia.library". Before any
+Dale, 18 October 2026: GFOpenFiles' Information window gets "file properties
+and image format. This will come from our gfopenmedia.library". Before any
 hardware decode, the library's first call tells what a file is: a small,
 stable public call that every later version keeps. It reads containers'
 headers only to say what they hold; it still never takes a container apart
@@ -75,8 +75,8 @@ headers only to say what they hold; it still never takes a container apart
   channels, sample rate and bits, the bit rate and the tracks of each kind.
   `OM_ReleaseMediaInfo` gives it back; the library allocates it, so later
   versions add fields at the end (`omi_Version`, `omi_Size`).
-  `OM_CodecName` names a codec. `include/openmedia/openmedia.h` is the
-  interface, `docs/openmedia.doc` its autodoc.
+  `OM_CodecName` names a codec. `include/gfopenmedia/gfopenmedia.h` is the
+  interface, `docs/gfopenmedia.doc` its autodoc.
 - **Our own parsers first** (`library/om_probe.c`), written from the formats'
   public specifications and nothing else (no FFmpeg, libav or MediaInfo code):
   - **video:** MP4, QuickTime and 3GP (ISO base media), Matroska and WebM,
@@ -94,7 +94,7 @@ headers only to say what they hold; it still never takes a container apart
   With `OMA_Decode` (off by default) a datatype may load the whole file when
   that is the only way to learn a picture's size or a sound's length: a full
   decode, which costs seconds for a large JPEG on a 68040 and the picture's
-  memory while it runs. The autodoc says so; OpenFiles asks for it only on a
+  memory while it runs. The autodoc says so; GFOpenFiles asks for it only on a
   picture under 1 MB.
 - **A damaged or hostile file costs little.** Every read goes through one
   reader that stops at the file's end and at a budget (1 MB unless
@@ -105,8 +105,8 @@ headers only to say what they hold; it still never takes a container apart
   Nothing big goes on the stack: the calls run on the caller's, which may be
   4 KB (the deepest chain is about 1.5 KB; `build.sh` lists the largest
   frames on every build). The work buffers (112 KB) are allocated per call.
-- **Where it lives:** `LIBS:openmedia.library` on disk (40 KB). The ROM is
-  full; OpenUp installs the library with OpenFiles.
+- **Where it lives:** `LIBS:gfopenmedia.library` on disk (40 KB). The ROM is
+  full; GFOpenUp installs the library with GFOpenFiles.
 - **Tests.** `tests/host/run.sh` makes 60 sample files with FFmpeg's
   command-line tool and `make_iff.py` (none is kept in the repository, and no
   FFmpeg code is in the library), checks each against `samples.txt` (512
@@ -116,7 +116,7 @@ headers only to say what they hold; it still never takes a container apart
   times, and feeds made-up hostile headers (boxes inside boxes, sizes of
   2^63, a million empty elements, lacing that never ends), all under
   AddressSanitizer, checking each probe stays within its read budget.
-  `C:OpenMediaInfo` (`tools/`) prints the answer on the Amiga, one line a
+  `C:GFOpenMediaInfo` (`tools/`) prints the answer on the Amiga, one line a
   file with `LINE` in the host tests' form, so a lab's answers compare with
   the host's.
 
@@ -145,6 +145,6 @@ are written in when phase 1 builds them, at these offsets.
 ## 7. Licences
 
 The library, drivers, headers and test tools are MIT, Copyright (c) 2026
-AmigaChrome Team. The FFmpeg fallback module is LGPL, built and shipped as its
+AmiCradle Team. The FFmpeg fallback module is LGPL, built and shipped as its
 own file with its source. VLC's port is in its own repository; our files
 there are MIT, and VLC's keep VLC's licences.

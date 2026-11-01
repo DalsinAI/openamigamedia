@@ -1,28 +1,28 @@
 Short:        Video hardware decode and encode library
 Uploader:     (We fill this in at upload time)
-Author:       AmigaChrome Team
+Author:       AmiCradle Team
 Type:         util/libs
 Version:      0.1
-Requires:     OpenRTG and OpenGPU
+Requires:     GFOpenRTG and GFOpenGPU
 Architecture: m68k-amigaos >= 3.2.0
 Distribution: Aminet
 
-OpenMedia gives Amiga programs a graphics chip's video engines.
-openmedia.library decodes and encodes H.264, H.265/HEVC, VP9, AV1 and more
+GFOpenMedia gives Amiga programs a graphics chip's video engines.
+gfopenmedia.library decodes and encodes H.264, H.265/HEVC, VP9, AV1 and more
 through one interface, with a driver per chip.
 
-Decoded frames go straight into OpenRTG's video RAM, where OpenGPU converts,
+Decoded frames go straight into GFOpenRTG's video RAM, where GFOpenGPU converts,
 scales and composites them, so the CPU never copies a frame.
 
-Drivers: AmigaChrome (the GPU's own video engines through the ACRTG board),
+Drivers: AmiCradle (the GPU's own video engines through the ACRTG board),
 the PiStorm (the Raspberry Pi's VideoCore), and a CPU fallback module built on
 FFmpeg for any Amiga. VLC for AmigaOS is its first user.
 
-Status: stage 0 is built: openmedia.library 1.0 tells what a file is
-(OM_ObtainMediaInfoA), and C:OpenMediaInfo shows it. The video engines come next.
+Status: stage 0 is built: gfopenmedia.library 1.0 tells what a file is
+(OM_ObtainMediaInfoA), and C:GFOpenMediaInfo shows it. The video engines come next.
 
 Licence: MIT, Copyright (c) 2026 AmigaChrome Team. The FFmpeg fallback module
 keeps FFmpeg's LGPL and ships as its own file with its source. If you build on
-it, we ask that you credit the AmigaChrome Team.
+it, we ask that you credit the AmiCradle Team.
 
 Source: https://github.com/DalsinAI/openamigamedia

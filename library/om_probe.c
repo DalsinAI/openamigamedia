@@ -1,4 +1,4 @@
-/* om_probe: openmedia.library's own parsers (stage 0); om_probe.h says
+/* om_probe: gfopenmedia.library's own parsers (stage 0); om_probe.h says
  * what they are and the specifications they follow. Every read goes
  * through rd(), which stops at the file's end and at the budget; every
  * length and count from a file is checked before it is used, and every
@@ -7,7 +7,7 @@
  *
  * MIT, Copyright (c) 2026 AmigaChrome Team. */
 #define OPENMEDIA_CONSTANTS_ONLY
-#include "../include/openmedia/openmedia.h"
+#include "../include/gfopenmedia/gfopenmedia.h"
 #include "om_probe.h"
 
 #define BIG 0xFFFFFFFFUL

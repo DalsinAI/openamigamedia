@@ -1,4 +1,4 @@
-/* om_probe: openmedia.library's own parsers (stage 0). Plain C with no
+/* om_probe: gfopenmedia.library's own parsers (stage 0). Plain C with no
  * operating system calls: the library gives them a read callback over a DOS
  * file, the host tests one over a stdio file. Each parser reads only the
  * header bytes it needs, through om_src, which counts what is read and
@@ -52,7 +52,7 @@ typedef struct om_src {
 #define OM_NAME 32
 
 typedef struct om_info {
-    uint32_t kind, container, flags;    /* OMK_, OMF_, OMIF_ (openmedia/openmedia.h) */
+    uint32_t kind, container, flags;    /* OMK_, OMF_, OMIF_ (gfopenmedia/gfopenmedia.h) */
     char format[OM_NAME];               /* the container's name, "" when unknown */
     uint64_t size;
     uint32_t duration_ms;

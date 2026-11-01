@@ -1,11 +1,11 @@
 TABLE OF CONTENTS
 
-openmedia.library/OM_CodecName
-openmedia.library/OM_ObtainMediaInfoA
-openmedia.library/OM_ReleaseMediaInfo
+gfopenmedia.library/OM_CodecName
+gfopenmedia.library/OM_ObtainMediaInfoA
+gfopenmedia.library/OM_ReleaseMediaInfo
 
 openmedia.library 1.0 (18.10.2026). MIT, Copyright (c) 2026 AmigaChrome Team.
-openmedia.library/OM_CodecName                 openmedia.library/OM_CodecName
+gfopenmedia.library/OM_CodecName                 gfopenmedia.library/OM_CodecName
 
    NAME
 	OM_CodecName -- a codec's name, for people (V1)
@@ -22,7 +22,7 @@ openmedia.library/OM_CodecName                 openmedia.library/OM_CodecName
 	library is open.
 
    INPUTS
-	codec - an OMC_ code from <openmedia/openmedia.h>.
+	codec - an OMC_ code from <gfopenmedia/gfopenmedia.h>.
 
    RESULT
 	name - the name, or NULL for OMC_NONE, OMC_OTHER and codes this
@@ -30,9 +30,9 @@ openmedia.library/OM_CodecName                 openmedia.library/OM_CodecName
 	    omi_AudioCodecName hold the file's own code for the codec.
 
    SEE ALSO
-	OM_ObtainMediaInfoA(), <openmedia/openmedia.h>
+	OM_ObtainMediaInfoA(), <gfopenmedia/gfopenmedia.h>
 
-openmedia.library/OM_ObtainMediaInfoA   openmedia.library/OM_ObtainMediaInfoA
+gfopenmedia.library/OM_ObtainMediaInfoA   gfopenmedia.library/OM_ObtainMediaInfoA
 
    NAME
 	OM_ObtainMediaInfoA -- what a file is (V1)
@@ -107,7 +107,7 @@ openmedia.library/OM_ObtainMediaInfoA   openmedia.library/OM_ObtainMediaInfoA
 	    OMERR_NOMEM, OMERR_READ, OMERR_ARGS (no file given).
 
    RESULT
-	info - a struct OMMediaInfo (<openmedia/openmedia.h>), read-only,
+	info - a struct OMMediaInfo (<gfopenmedia/gfopenmedia.h>), read-only,
 	    to be given back with OM_ReleaseMediaInfo(); or NULL. A file
 	    nobody knows is not an error: omi_Kind is OMK_UNKNOWN and
 	    omi_FormatName "Unknown". A value not known is 0, a name not
@@ -141,9 +141,9 @@ openmedia.library/OM_ObtainMediaInfoA   openmedia.library/OM_ObtainMediaInfoA
 
    SEE ALSO
 	OM_ReleaseMediaInfo(), OM_CodecName(), datatypes.library/ObtainDataType(),
-	<openmedia/openmedia.h>, C:OpenMediaInfo
+	<gfopenmedia/gfopenmedia.h>, C:GFOpenMediaInfo
 
-openmedia.library/OM_ReleaseMediaInfo   openmedia.library/OM_ReleaseMediaInfo
+gfopenmedia.library/OM_ReleaseMediaInfo   gfopenmedia.library/OM_ReleaseMediaInfo
 
    NAME
 	OM_ReleaseMediaInfo -- give back what OM_ObtainMediaInfoA gave (V1)
