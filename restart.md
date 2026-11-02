@@ -8,7 +8,7 @@ GFOpenMedia: gfopenmedia.library gives Amiga programs a graphics chip's video en
 
 ## Where it stands (18 October 2026)
 
-Stage 0 is built (DESIGN.md section 6): `gfopenmedia.library` 1.0 with `OM_ObtainMediaInfoA`, `OM_ReleaseMediaInfo` and `OM_CodecName`, the parsers' host tests (60 samples, 512 checks, fuzzing), and `C:GFOpenMediaInfo`; tested in a lab on the open ROM and on Kickstart 3.2.3. GFOpenFiles 0.4.1's Information window is its first user. The blockers of phase 1, GFOpenGPU and the ACRTG v3 ring (amigachrome #213), are done.
+Stage 0 is built (DESIGN.md section 6): `gfopenmedia.library` 1.0 with `OM_ObtainMediaInfoA`, `OM_ReleaseMediaInfo` and `OM_CodecName`, the parsers' host tests (60 samples, 512 checks, fuzzing), and `C:GFOpenMediaInfo`; tested in a lab on the open ROM and on Kickstart 3.2.3. GFOpenFiles 0.4.1's Information window is its first user. The blockers of phase 1, GFOpenGPU and the ACRTG v3 ring (amicradle #213), are done.
 
 ## Merged lately
 
@@ -33,8 +33,8 @@ No active thread (follows GFOpenGPU).
 
 ## Capsules
 
-Restart capsules for this repo's workstreams, in amigachrome's `capjumps/` shelf:
+Restart capsules for this repo's workstreams, in amicradle's `capjumps/` shelf:
 
-- [`20261006_AmigaChrome_OpenGPU_Mesa_GPU_Restart_Capsule.zip`](https://github.com/DalsinAI/amigachrome/tree/main/capjumps)
+- [`20261006_AmigaChrome_OpenGPU_Mesa_GPU_Restart_Capsule.zip`](https://github.com/DalsinAI/amicradle/tree/main/capjumps)
 
 Team rules that still hold: commits as SacredTrees with no co-author lines; third-party code only on "yes with review" (licence checked, commit and sha256 pinned, fetched at build, never committed); deploys with deploy_dev.py only, on a typed line.

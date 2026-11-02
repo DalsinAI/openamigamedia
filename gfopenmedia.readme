@@ -25,4 +25,4 @@ Licence: MIT, Copyright (c) 2026 AmiCradle Team. The FFmpeg fallback module
 keeps FFmpeg's LGPL and ships as its own file with its source. If you build on
 it, we ask that you credit the AmiCradle Team.
 
-Source: https://github.com/DalsinAI/openamigamedia
+Source: https://github.com/DalsinAI/gfopenmedia
