@@ -40,7 +40,7 @@ GFOpenGPU's are (`ACRTG.gpu`). The names below are proposals.
 
 ## 3. Its users
 
-- **VLC for AmigaOS** (`DalsinAI/openamigavlc`): its GFOpenMedia decoder module,
+- **VLC for AmigaOS** (`DalsinAI/gfopenvlc`): its GFOpenMedia decoder module,
   hardware first (H.264, then HEVC). Its video output composites GFOpenMedia's
   surfaces through GFOpenRTG and GFOpenGPU.
 - **The screen recorder** (an AmiCradle idea): an instance's picture encoded
@@ -52,7 +52,7 @@ GFOpenGPU's are (`ACRTG.gpu`). The names below are proposals.
 | Phase | Delivers | Done when |
 | --- | --- | --- |
 | 1 | The interface and headers; `ACRTG.media` with VA-API and FFmpeg on the host; H.264 decode into a surface; a test player | A 1080p H.264 file plays smoothly on a GFOpenRTG monitor in AmiCradle |
-| 2 | What VLC's port needs (openamigavlc phase 2) | VLC plays a local file and a network stream through GFOpenMedia |
+| 2 | What VLC's port needs (gfopenvlc phase 2) | VLC plays a local file and a network stream through GFOpenMedia |
 | 3 | HEVC, VP9 and AV1; encode (H.264, HEVC) | A screen recorded from an instance, encoded by the PC's hardware |
 | 4 | `VideoCore.media` for the PiStorm; `CPU.media` | Playback on a PiStorm, and on a real Amiga through the CPU module |
 | 5 | The Installer; Aminet (util/libs) | |

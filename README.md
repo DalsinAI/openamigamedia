@@ -8,7 +8,7 @@ the CPU never copies a frame.
 
 We, 4 October 2026: "expose a graphics chip's H.264, H.265 etc hardware
 encoding", with VLC's port driving it. VLC for AmigaOS
-(https://github.com/DalsinAI/openamigavlc) is its first user, and its needs
+(https://github.com/DalsinAI/gfopenvlc) is its first user, and its needs
 decide what GFOpenMedia offers first. `DESIGN.md` is the design.
 
 Status, 18 October 2026: **stage 0 is built**: `gfopenmedia.library` 1.0
@@ -29,7 +29,7 @@ LVOs `DESIGN.md` section 6 keeps for them.
 It goes in `LIBS:` (about 40 KB).
 
 Part of the GFOpen family, beside GFOpenRTG and GFOpenGPU
-(https://github.com/DalsinAI/openamigartg), GFOpenSocket and GFOpenMulticore.
+(https://github.com/DalsinAI/gfopenrtg), GFOpenSocket and GFOpenMulticore.
 It works on AmiCradle, PiStorm and real Amigas.
 
 ## Licence
