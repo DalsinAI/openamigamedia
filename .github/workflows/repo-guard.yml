@@ -62,7 +62,7 @@ jobs:
               // drop a rule or blank lines left dangling at the end
               while (out.length && /^\s*(---+|\*\*\*+|___+)?\s*$/.test(out[out.length - 1])) out.pop();
               let s = out.join('\n').replace(/\n{3,}/g, '\n\n').replace(/^\s*\n/, '');
-              return s.trim() ? s : 'Team 3';
+              return s.trim() ? s : 'AmiCradle Team';
             }
             const { owner, repo } = context.repo;
             const ev = context.eventName, p = context.payload;
